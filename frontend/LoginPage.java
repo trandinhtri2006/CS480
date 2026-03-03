@@ -16,11 +16,20 @@ public class LoginPage extends JFrame {
         this.setResizable(false);
         this.setSize(WIDTH, HEIGHT);
 
+        /* Setting the application icon */
+        try {
+            File file = new File("Background/profile_thumb.jpg");
+            ImageIcon image = new ImageIcon(ImageIO.read(file));
+            this.setIconImage(image.getImage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
        /* SETTING THE BACKGROUND */
         JLabel imageLabel = null;
 
         try {
-            File file = new File("Background/NoAccount.png");
+            File file = new File("Background/images_3.jpg");
             ImageIcon image = new ImageIcon(ImageIO.read(file));
             imageLabel = new JLabel(image);
             imageLabel.setLayout(null); // IMPORTANT → allows positioning components on background
