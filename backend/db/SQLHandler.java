@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class SQLHandler {
 
-    private static final String DEFAULT_DB_URL = "jdbc:sqlite:mapapp.db";
+    private static final String DEFAULT_DB_URL = "jdbc:sqlite:backend/db/mapapp.db";
 
     private final String dbUrl;
 
@@ -75,31 +75,46 @@ private String loadSchemaSql() throws IOException {
     
      //Splits a SQL script into individual statements.
      
-    private List<String> splitSqlStatements(String sqlScript) {
-        List<String> statements = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
+   private List<String> splitSqlStatements(String sqlScript) {
+    List<String> statements = new ArrayList<>();
+    StringBuilder current = new StringBuilder();
+    boolean inTrigger = false;
 
-        for (String line : sqlScript.split("\n")) {
-            String trimmed = line.trim();
+    String[] lines = sqlScript.split("\\R");
 
-            if (trimmed.startsWith("--") || trimmed.isEmpty()) {
-                continue;
+    for (String line : lines) {
+        String trimmed = line.trim();
+
+        if (trimmed.isEmpty() || trimmed.startsWith("--")) {
+            continue;
+        }
+
+        if (trimmed.toUpperCase().startsWith("CREATE TRIGGER")) {
+            inTrigger = true;
+        }
+
+        current.append(line).append('\n');
+
+        if (inTrigger) {
+            if (trimmed.equalsIgnoreCase("END;")) {
+                statements.add(current.toString().trim());
+                current.setLength(0);
+                inTrigger = false;
             }
-
-            current.append(line).append('\n');
-
+        } else {
             if (trimmed.endsWith(";")) {
                 statements.add(current.toString().trim());
                 current.setLength(0);
             }
         }
-
-        if (!current.isEmpty()) {
-            statements.add(current.toString().trim());
-        }
-
-        return statements;
     }
+
+    if (!current.isEmpty()) {
+        statements.add(current.toString().trim());
+    }
+
+    return statements;
+}
 
     private String readAll(Reader reader) throws IOException {
         StringBuilder builder = new StringBuilder();
