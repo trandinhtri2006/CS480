@@ -23,7 +23,7 @@ public class ChangePassword extends JFrame {
         setAppIcon("Background/profile_thumb.jpg");
 
         /* Set background image */
-        JLabel backgroundLabel = setBackground("Background/LoginpageBackground.jpg");
+        JLabel backgroundLabel = setBackground("Background/NoBitches.jpg");
 
         /* Show window */
         setVisible(true);
