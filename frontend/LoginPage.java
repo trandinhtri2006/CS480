@@ -5,92 +5,126 @@ import javax.swing.*;
 
 public class LoginPage extends JFrame {
 
-    private final static int WIDTH = 800;
-    private final static int HEIGHT = 600;
+    private static final int WIDTH = 1000;
+    private static final int HEIGHT = 800;
 
-    public LoginPage() throws HeadlessException {
+    private JTextField userText;
+    private JPasswordField passText;
+    private JLabel errorLabel; // single label to show errors
 
-        /* DEFAULT SETTING */
-        this.setTitle("Login");
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setResizable(false);
-        this.setSize(WIDTH, HEIGHT);
+    public LoginPage() {
+        /* DEFAULT SETTINGS */
+        setTitle("Login");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+        setSize(WIDTH, HEIGHT);
+        setLocationRelativeTo(null); // Center window
 
-        /* Setting the application icon */
+        /* Set application icon */
+        setAppIcon("Background/profile_thumb.jpg");
+
+        /* Set background image */
+        JLabel backgroundLabel = setBackground("Background/LoginpageBackground.jpg");
+
+        /* Add login panel with error label */
+        JPanel loginPanel = createLoginPanel();
+        backgroundLabel.add(loginPanel);
+
+        /* Show window */
+        setVisible(true);
+    }
+
+    private void setAppIcon(String path) {
         try {
-            File file = new File("Background/profile_thumb.jpg");
-            ImageIcon image = new ImageIcon(ImageIO.read(file));
-            this.setIconImage(image.getImage());
+            ImageIcon icon = new ImageIcon(ImageIO.read(new File(path)));
+            setIconImage(icon.getImage());
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-       /* SETTING THE BACKGROUND */
-        JLabel imageLabel = null;
-
+    private JLabel setBackground(String path) {
+        JLabel backgroundLabel = new JLabel();
+        backgroundLabel.setLayout(null); // Allows absolute positioning
         try {
-            File file = new File("Background/images_3.jpg");
-            ImageIcon image = new ImageIcon(ImageIO.read(file));
-            imageLabel = new JLabel(image);
-            imageLabel.setLayout(null); // IMPORTANT → allows positioning components on background
-            this.setContentPane(imageLabel);
-
+            ImageIcon background = new ImageIcon(ImageIO.read(new File(path)));
+            backgroundLabel.setIcon(background);
+            setContentPane(backgroundLabel);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return backgroundLabel;
+    }
 
-        /* Getting User Login Information */
-        int infoWidth = WIDTH/6;
-        int infoHeight = HEIGHT/3;
-        Color semiTransBG = new Color(255, 255, 255, 128);
-        JLabel info = new JLabel();
-        info.setLayout(null);
-        info.setOpaque(true);
-        info.setBackground(semiTransBG);
-        info.setBounds(infoWidth, infoHeight, 500, 300);
-        imageLabel.add(info);
+    private JPanel createLoginPanel() {
+        int panelWidth = 500;
+        int panelHeight = 200;
 
-        // USERNAME LABEL
+        // Center horizontally and place near bottom
+        int marginFromBottom = 100;
+        int panelX = (WIDTH - panelWidth) / 2;
+        int panelY = HEIGHT - panelHeight - marginFromBottom;
+
+        // Semi-transparent panel
+        JPanel panel = new JPanel(null);
+        panel.setBounds(panelX, panelY, panelWidth, panelHeight);
+        panel.setBackground(new Color(255, 255, 255, 180));
+
+        // Username
         JLabel userLabel = new JLabel("Username:");
-        userLabel.setBounds(25, 25, 80, 25);
-        info.add(userLabel);   
+        userLabel.setBounds(25, 10, 80, 25);
+        panel.add(userLabel);
 
-        // USERNAME FIELD
-        JTextField userText = new JTextField();
-        userText.setBounds(25, 50, 425, 25);
-        info.add(userText);
+        userText = new JTextField();
+        userText.setBounds(25, 30, 450, 25);
+        panel.add(userText);
 
-        // PASSWORD LABEL
+        // Password
         JLabel passLabel = new JLabel("Password:");
-        passLabel.setBounds(25, 125, 80, 25);
-        info.add(passLabel);
+        passLabel.setBounds(25, 55, 80, 25);
+        panel.add(passLabel);
 
-        // PASSWORD FIELD
-        JPasswordField passText = new JPasswordField();
-        passText.setBounds(25, 150, 425, 25);
-        info.add(passText);
+        passText = new JPasswordField();
+        passText.setBounds(25, 75, 450, 25);
+        panel.add(passText);
 
-        // LOGIN BUTTON
+        // Error label (hidden by default)
+        errorLabel = new JLabel("");
+        errorLabel.setBounds(25, 110, 450, 25);
+        errorLabel.setBackground(new Color(0,0,0,0));
+        errorLabel.setForeground(Color.RED);
+        errorLabel.setVisible(false);
+        panel.add(errorLabel);
+
+        // Login button
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(infoWidth + 50, 200, 100, 30);
-        info.add(loginButton);
+        loginButton.setBounds((panelWidth - 100) / 2, 145, 100, 30); // center button
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setBackground(new Color(50, 50, 100));
+        loginButton.addActionListener(e -> handleLogin());
+        panel.add(loginButton);
 
-        /* BUTTON CLICK EVENT */
-        loginButton.addActionListener(e -> {
+        return panel;
+    }
 
-            // Getting entered values
-            String username = userText.getText();
-            String password = new String(passText.getPassword());
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
 
-            // Example validation (replace with database check)
-            if(username.equals("admin") && password.equals("1234")) {
-                JOptionPane.showMessageDialog(this, "Login Successful");
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid Login");
-            }
-        });
+    private void handleLogin() {
+        String username = userText.getText();
+        String password = new String(passText.getPassword());
 
-        /* Making sure user can see */
-        this.setVisible(true);
+        // Hide previous error first
+        errorLabel.setVisible(false);
+
+        if (username.isBlank() || password.isBlank()) {
+            showError("The username or password cannot be empty.");
+        } else if (!"admin".equals(username) || !"1234".equals(password)) {
+            showError("Incorrect username or password.");
+        } else {
+            JOptionPane.showMessageDialog(this, "Login Successful");
+        }
     }
 }
