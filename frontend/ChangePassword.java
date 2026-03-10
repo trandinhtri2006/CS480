@@ -1,53 +1,43 @@
-    import java.io.*;
+import java.awt.*;
+import java.io.*;
 import javax.imageio.*;
 import javax.swing.*;
 
-public class ChangePassword extends JFrame {
-
+public class ChangePassword extends JPanel {
     private static final int WIDTH = 1000;
     private static final int HEIGHT = 800;
+    final private App app;
 
-    private JTextField userText;
-    private JPasswordField passText;
-    private JLabel errorLabel; // single label to show errors
+    public ChangePassword(App app) {
+        this.app = app;
 
-    public ChangePassword() {
-        /* DEFAULT SETTINGS */
-        setTitle("Login");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
-        setSize(WIDTH, HEIGHT);
-        setLocationRelativeTo(null); // Center window
+        setLayout(null);
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
-        /* Set application icon */
-        setAppIcon("Background/profile_thumb.jpg");
-
-        /* Set background image */
+        // Create background JLabel and add to this JPanel
         JLabel backgroundLabel = setBackground("Background/NoBitches.jpg");
-
-        /* Show window */
-        setVisible(true);
+        add(backgroundLabel);
     }
 
-    private void setAppIcon(String path) {
-        try {
-            ImageIcon icon = new ImageIcon(ImageIO.read(new File(path)));
-            setIconImage(icon.getImage());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Sets background image inside a JLabel
+     */
     private JLabel setBackground(String path) {
         JLabel backgroundLabel = new JLabel();
         backgroundLabel.setLayout(null); // Allows absolute positioning
+
         try {
             ImageIcon background = new ImageIcon(ImageIO.read(new File(path)));
             backgroundLabel.setIcon(background);
-            setContentPane(backgroundLabel);
+            backgroundLabel.setBounds(0, 0, WIDTH, HEIGHT);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return backgroundLabel;
+    }
+
+    private JPanel createChangePasswordPanel() {
+        return null;
     }
 }
