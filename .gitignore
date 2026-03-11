@@ -1,0 +1,11 @@
+# Database
+mapapp.db
+
+# Maven build output
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.class
