@@ -212,6 +212,7 @@ public class LoginPage extends JPanel {
         if (user == null) {
             showError("Incorrect username or password.");
         } else {
+            app.setCurrentUser(user);
             clearScene("settingPage");
         }
     } catch (Exception e) {
