@@ -2,13 +2,11 @@
 package service;
 
 import db.SQLHandler;
-import model.User;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.util.Base64;
+import model.User;
 
 //handles authentication logic 
 public class AuthService {
