@@ -218,7 +218,7 @@ public class HomePage extends JPanel {
                 #map { height: 100%%; width: 100%%; }
                 html, body { height: 100%%; margin: 0; padding: 0; }
               </style>
-              <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+              <script src="https://maps.googleapis.com/maps/api/js?key= ***API KEY HERE*** &libraries=places"></script>
               <script>
                 let map, directionsService, directionsRenderer;
                 function initMap() {
