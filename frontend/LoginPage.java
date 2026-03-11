@@ -90,7 +90,45 @@ public class LoginPage extends JFrame {
             }
         });
 
+<<<<<<< Updated upstream
         /* Making sure user can see */
         this.setVisible(true);
+=======
+    // ------------------------------
+    // Display an error message
+    // ------------------------------
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
+
+    // ------------------------------
+    // Clear errors and inputs and switch scenes
+    // ------------------------------
+    private void clearScene(String page) {
+        errorLabel.setVisible(false);
+        userText.setText("");
+        passText.setText("");
+        app.changeScene(page);
+    }
+
+    // ------------------------------
+    // Validate login credentials
+    // ------------------------------
+    private void handleLogin() {
+        String username = userText.getText().trim();
+        String password = new String(passText.getPassword()).trim();
+
+        errorLabel.setVisible(false); // reset error message
+
+        if (username.isEmpty() || password.isEmpty()) {
+            showError("The username or password cannot be empty.");
+        } else if (!username.equals("admin") || !password.equals("1234")) {
+            showError("Incorrect username or password.");
+        } else {
+            // Success: switch to change password page
+            app.changeScene("home");
+        }
+>>>>>>> Stashed changes
     }
 }

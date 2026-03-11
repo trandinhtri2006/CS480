@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="javafx">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/javafx.base" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/javafx.controls" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/javafx.fxml" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/javafx.graphics" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/javafx.media" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/javafx.swing" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/javafx.web" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/jdk.jsobject" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/jfx.incubator.input" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-25.0.2_windows-x64_bin-sdk/javafx-sdk-25.0.2/src/jfx.incubator.richtext" />
+    </SOURCES>
+  </library>
+</component>
