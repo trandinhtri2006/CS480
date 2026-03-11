@@ -46,9 +46,10 @@ public class App extends JFrame {
         add(container);
 
         setTitle("GPS APP");
-        setSize(1000, 800);
+        setSize(1280, 720);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
         setVisible(true);
     }
 

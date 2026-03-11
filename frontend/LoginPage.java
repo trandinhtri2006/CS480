@@ -8,8 +8,8 @@ import javax.swing.*;
 
 public class LoginPage extends JPanel {
 
-    private static final int WIDTH = 1000; // Panel width
-    private static final int HEIGHT = 800; // Panel height
+    private static final int WIDTH = 1280; // Panel width
+    private static final int HEIGHT = 720; // Panel height
 
     // Input fields for username and password
     private JTextField userText;
@@ -198,29 +198,28 @@ public class LoginPage extends JPanel {
     // ------------------------------
     // Validate login credentials
     // ------------------------------
-   private void handleLogin() {
-    String username = userText.getText().trim();
-    String password = new String(passText.getPassword()).trim();
+    private void handleLogin() {
+        String username = userText.getText().trim();
+        String password = new String(passText.getPassword()).trim();
 
-    errorLabel.setVisible(false);
+        errorLabel.setVisible(false);
 
-    if (username.isEmpty() || password.isEmpty()) {
-        showError("The username or password cannot be empty.");
-        return;
-    }
-
-    try {
-        User user = authService.loginUser(username, password);
-
-        if (user == null) {
-            showError("Incorrect username or password.");
-        } else {
-            app.setCurrentUser(user);
-            clearScene("settingPage");
+        if (username.isEmpty() || password.isEmpty()) {
+            showError("The username or password cannot be empty.");
+            return;
         }
-    } catch (Exception e) {
-        showError("Login failed.");
-    }
-}
 
+        try {
+            User user = authService.loginUser(username, password);
+
+            if (user == null) {
+                showError("Incorrect username or password.");
+            } else {
+                app.setCurrentUser(user);
+                clearScene("settingPage");
+            }
+        } catch (Exception e) {
+            showError("Login failed.");
+        }
+    }
 }

@@ -3,9 +3,11 @@ import service.AuthService;
 import java.awt.*;
 import javax.swing.*;
 
+import model.User;
+
 public class ChangePassword extends JPanel {
-    private static final int WIDTH = 1000;   // Panel width
-    private static final int HEIGHT = 800;   // Panel height
+    private static final int WIDTH = 1280;   // Panel width
+    private static final int HEIGHT = 720;   // Panel height
 
     // Input fields for the account creation form
     private JPasswordField passwordText;
@@ -136,8 +138,8 @@ public class ChangePassword extends JPanel {
 
     try {
         AuthService authService = app.getAuthService();
-        String username = app.getCurrentUser().getUsername();
-
+        String username = app.getCurrentUser().getEmail();
+        
         authService.resetPassword(username, password);
 
         JOptionPane.showMessageDialog(this, "Password changed successfully.");

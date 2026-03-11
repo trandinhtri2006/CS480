@@ -2,8 +2,8 @@ import java.awt.*;
 import javax.swing.*;
 
 public class SettingPage extends JPanel {
-    private static final int WIDTH = 1000;   // Panel width
-    private static final int HEIGHT = 800;   // Panel height
+    private static final int WIDTH = 1280;   // Panel width
+    private static final int HEIGHT = 720;   // Panel height
 
     // Reference to the main application to switch scenes
     final private App app;  
@@ -62,7 +62,7 @@ public class SettingPage extends JPanel {
         usernamePanel.add(usernameButton, BorderLayout.EAST);
 
         // Username on the far right
-        JLabel usernameLabel = new JLabel("Username: CHUD1234");
+        JLabel usernameLabel = new JLabel("Email: CHUD1234");
         usernamePanel.add(usernameLabel, BorderLayout.WEST);
 
         panel.add(usernamePanel);

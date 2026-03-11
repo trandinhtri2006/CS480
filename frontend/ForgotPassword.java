@@ -4,8 +4,8 @@ import java.awt.*;
 import javax.swing.*;
 
 public class ForgotPassword extends JPanel {
-    private static final int WIDTH = 1000;   // Panel width
-    private static final int HEIGHT = 800;   // Panel height
+    private static final int WIDTH = 1280;   // Panel width
+    private static final int HEIGHT = 720;   // Panel height
 
     // Input fields for the account creation form
     private JTextField usernameText;

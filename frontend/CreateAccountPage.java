@@ -6,8 +6,8 @@ import javax.imageio.*;
 import javax.swing.*;
 
 public class CreateAccountPage extends JPanel {
-    private static final int WIDTH = 1000;   // Panel width
-    private static final int HEIGHT = 800;   // Panel height
+    private static final int WIDTH = 1280;   // Panel width
+    private static final int HEIGHT = 720;   // Panel height
 
     // Input fields for the account creation form
     private JTextField usernameText;
@@ -31,13 +31,7 @@ public class CreateAccountPage extends JPanel {
         // Use absolute positioning
         setLayout(null);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-
-        // Load background image once
-        try {
-            backgroundImage = ImageIO.read(new File("Background/LoginpageBg.jpg"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }   
+        setBackground(Color.GRAY);
 
         // ------------------------------
         // Back Button at top-left corner
@@ -73,22 +67,14 @@ public class CreateAccountPage extends JPanel {
     private JPanel createChangePasswordPanel() {
         int panelWidth = 500;
         int panelHeight = 300;
-        int marginFromBottom = 250;
+        int marginFromBottom = 400;
 
         // Center horizontally, offset from bottom
         int panelX = (WIDTH - panelWidth) / 2;
         int panelY = HEIGHT - panelHeight - marginFromBottom;
 
         // Transparent panel with white background and some alpha
-        JPanel panel = new JPanel(null) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(new Color(255, 255, 255, 180)); // translucent white
-                g.fillRect(0, 0, getWidth(), getHeight());
-            }
-        };
-        panel.setOpaque(false);
+        JPanel panel = new JPanel(null);
         panel.setBounds(panelX, panelY, panelWidth, panelHeight);
 
         // ------------------------------
