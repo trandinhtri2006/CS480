@@ -2,81 +2,100 @@
 
 A Java Swing desktop application for managing routes and user accounts, backed by a local SQLite database.
 
-## Prerequisites
+## Runtime and Build Requirements
 
-- **Java 17** or higher — [Download JDK](https://www.oracle.com/java/technologies/downloads/)
-- **Maven 3.6+** — bundled with IntelliJ IDEA or NetBeans, or [download standalone](https://maven.apache.org/download.cgi)
+- Recommended runtime for new machines: Java 21 (LTS)
+- Minimum runtime currently supported by project build settings: Java 17
+- Maven 3.9+ recommended
 
-To verify your installation:
-```bash
+Downloads:
+- JDK: https://www.oracle.com/java/technologies/downloads/
+- Maven: https://maven.apache.org/download.cgi
+
+Verify installation:
+
+```powershell
 java -version
 mvn -version
 ```
 
-## Running the Application
+## Windows VM Setup (Fresh Machine)
 
-From the project root directory (`CS480/`):
+1. Install JDK 21 and set JAVA_HOME.
+2. Install Maven and add Maven bin to PATH.
+3. Open PowerShell in the CS480 project root.
+4. Run:
 
-```bash
-mvn exec:java
+```powershell
+mvn clean compile exec:java
 ```
 
-That's it. Maven will download dependencies automatically on the first run.
+First run may take longer while Maven downloads dependencies.
 
-## Other Useful Commands
+## Porting to a New Windows VM
 
-```bash
-# Compile only (check for errors without launching)
+If you want to preserve existing users and favorite routes:
+
+1. Copy the entire project folder to the new VM.
+2. Copy mapapp.db from the old machine into the project root on the new machine.
+3. Run:
+
+```powershell
+mvn clean compile exec:java
+```
+
+If you want a clean start instead, do not copy mapapp.db.
+
+## Daily Commands
+
+```powershell
+# Run app (after at least one successful compile)
+mvn exec:java
+
+# Compile only
 mvn compile
 
-# Package into a JAR file (output: target/cs480-1.0-SNAPSHOT.jar)
+# Package JAR (target/cs480-1.0-SNAPSHOT.jar)
 mvn package
 
-# Clean compiled output
+# Clean build output
 mvn clean
 
-# Clean and recompile from scratch
+# Full rebuild
 mvn clean compile
 ```
+
+## Troubleshooting
+
+- Error: java.lang.ClassNotFoundException: App
+    - Cause: running exec before classes are compiled in current workspace state.
+    - Fix: run mvn clean compile exec:java.
+
+- PowerShell warning about PSReadLine and screen reader mode
+    - This warning is not related to Maven or Java execution.
 
 ## Project Structure
 
 ```
 CS480/
-├── pom.xml                        # Maven build file
-├── mapapp.db                      # SQLite database (created on first run)
-└── src/
-    └── main/
-        ├── java/
-        │   ├── App.java           # Entry point
-        │   ├── LoginPage.java
-        │   ├── CreateAccountPage.java
-        │   ├── HomePage.java
-        │   ├── SettingPage.java
-        │   ├── ChangePassword.java
-        │   ├── ChangeUsername.java
-        │   ├── ChangeFavRoute.java
-        │   ├── ForgotPassword.java
-        │   ├── db/
-        │   │   └── SQLHandler.java
-        │   ├── model/
-        │   │   ├── User.java
-        │   │   ├── FavoriteRoute.java
-        │   │   └── FavoriteRouteSummary.java
-        │   └── service/
-        │       ├── AuthService.java
-        │       └── FavoriteService.java
-        └── resources/
-            ├── Background/
-            │   └── loginpageBG.jpg
-            └── db/
-                └── schema.sql
+|- pom.xml
+|- mapapp.db                      # created on first run
+`- src/
+     `- main/
+            |- java/
+            |  |- App.java              # entry point
+            |  |- db/
+            |  |- model/
+            |  `- service/
+            `- resources/
+                 |- Background/
+                 `- db/schema.sql
 ```
 
 ## Dependencies
 
 | Library | Version | Purpose |
 |---|---|---|
-| `org.xerial:sqlite-jdbc` | 3.51.2.0 | SQLite database driver |
+| org.xerial:sqlite-jdbc | 3.51.2.0 | SQLite database driver |
 
-All dependencies are managed by Maven and downloaded automatically.
+Dependencies are managed by Maven and downloaded automatically.
