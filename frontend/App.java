@@ -1,5 +1,6 @@
 
 import db.SQLHandler;
+import model.User;
 import service.AuthService;
 import service.FavoriteService;
 
@@ -13,6 +14,7 @@ public class App extends JFrame {
     private SQLHandler sqlHandler;
     private AuthService authService;
     private FavoriteService favoriteService;
+    private User currentUser;
 
     public App() {
          try {
@@ -54,6 +56,28 @@ public class App extends JFrame {
     public void changeScene(String name) {
         cardLayout.show(container, name);
     }
+
+    public AuthService getAuthService() {
+    return authService;
+}
+
+public FavoriteService getFavoriteService() {
+    return favoriteService;
+}
+
+public User getCurrentUser() {
+    return currentUser;
+}
+
+public void setCurrentUser(User currentUser) {
+    this.currentUser = currentUser;
+}
+
+public void logout() {
+    this.currentUser = null;
+    changeScene("login");
+}
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(App::new);
