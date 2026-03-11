@@ -1,13 +1,14 @@
 import java.awt.*;
 import javax.swing.*;
 
-public class ChangeUsername extends JPanel {
+public class ForgotPassword extends JPanel {
     private static final int WIDTH = 1000;   // Panel width
     private static final int HEIGHT = 800;   // Panel height
 
     // Input fields for the account creation form
-    private JPasswordField fromField;
-    private JPasswordField toField;
+    private JTextField usernameText;
+    private JPasswordField passwordText;
+    private JPasswordField conPasswordText;
 
     // Label to display error messages
     private JLabel errorLabel;
@@ -15,7 +16,7 @@ public class ChangeUsername extends JPanel {
     // Reference to the main application to switch scenes
     final private App app;
 
-    public ChangeUsername(App app) {
+    public ForgotPassword(App app) {
         this.app = app;
 
         // Use absolute positioning
@@ -30,13 +31,13 @@ public class ChangeUsername extends JPanel {
         backButton.setBounds(25, 25, 90, 30); // Position at top-left
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
-        backButton.addActionListener(e -> clearScene("settingPage")); // Return to login page
+        backButton.addActionListener(e -> clearScene("login")); // Return to login page
         add(backButton);
 
-        add(createChangeFavRoutePanel());
+        add(createForgotPasswordPanel());
     }
 
-    private JPanel createChangeFavRoutePanel() {
+    private JPanel createForgotPasswordPanel() {
         int panelWidth = 500;
         int panelHeight = 300;
         int marginFromBottom = 400;
@@ -46,31 +47,49 @@ public class ChangeUsername extends JPanel {
         int panelY = HEIGHT - panelHeight - marginFromBottom;
 
         // Transparent panel with white background and some alpha
-        JPanel panel = new JPanel(null);
+        JPanel panel = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(new Color(255, 255, 255, 180)); // translucent white
+                g.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
         panel.setOpaque(false);
         panel.setBounds(panelX, panelY, panelWidth, panelHeight);
 
         // ------------------------------
-        // "From" Field
+        // Username field
         // ------------------------------
-        JLabel fromLabel = new JLabel("From:");
-        fromLabel.setBounds(25, 60, 100, 25);
-        panel.add(fromLabel);
+        JLabel userLabel = new JLabel("Username:");
+        userLabel.setBounds(25, 10, 100, 25);
+        panel.add(userLabel);
 
-        fromField = new JPasswordField();
-        fromField.setBounds(25, 80, 450, 25);
-        panel.add(fromField);
+        usernameText = new JTextField();
+        usernameText.setBounds(25, 30, 450, 25);
+        panel.add(usernameText);
 
         // ------------------------------
-        // "To" Field
+        // Password field
         // ------------------------------
-        JLabel toLabel = new JLabel("To:");
-        toLabel.setBounds(25, 110, 150, 25);
-        panel.add(toLabel);
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setBounds(25, 60, 100, 25);
+        panel.add(passLabel);
 
-        toField = new JPasswordField();
-        toField.setBounds(25, 130, 450, 25);
-        panel.add(toField);
+        passwordText = new JPasswordField();
+        passwordText.setBounds(25, 80, 450, 25);
+        panel.add(passwordText);
+
+        // ------------------------------
+        // Confirm password field
+        // ------------------------------
+        JLabel conPassLabel = new JLabel("Confirm Password:");
+        conPassLabel.setBounds(25, 110, 150, 25);
+        panel.add(conPassLabel);
+
+        conPasswordText = new JPasswordField();
+        conPasswordText.setBounds(25, 130, 450, 25);
+        panel.add(conPasswordText);
 
         // ------------------------------
         // Error message label (initially invisible)
@@ -85,12 +104,12 @@ public class ChangeUsername extends JPanel {
         // ------------------------------
         // "Create Account" button
         // ------------------------------
-        JButton confirmButton = new JButton("Confirm");
-        confirmButton.setBounds(150, 200, 200, 30);
-        confirmButton.setForeground(Color.WHITE);
-        confirmButton.setBackground(new Color(50, 50, 100));
-        confirmButton.addActionListener(e -> handleReset()); // Handle account creation
-        panel.add(confirmButton);
+        JButton resetButton = new JButton("Reset Password");
+        resetButton.setBounds(150, 200, 200, 30);
+        resetButton.setForeground(Color.WHITE);
+        resetButton.setBackground(new Color(50, 50, 100));
+        resetButton.addActionListener(e -> handleReset()); // Handle account creation
+        panel.add(resetButton);
 
         return panel;
     }
@@ -99,8 +118,10 @@ public class ChangeUsername extends JPanel {
     // Clear errors and inputs and switch scenes
     // ------------------------------
     private void clearScene(String page) {
-        fromField.setText("");
-        toField.setText("");
+        errorLabel.setVisible(false);
+        usernameText.setText("");
+        passwordText.setText("");
+        conPasswordText.setText("");
         app.changeScene(page);
     }
 
@@ -113,19 +134,22 @@ public class ChangeUsername extends JPanel {
     }
 
     // ------------------------------
-    // Handle change password logic
+    // Handle reset password logic
     // ------------------------------
     private void handleReset() {
-        String from = new String(fromField.getPassword()).trim();
-        String to = new String(toField.getPassword()).trim();
+        String username = usernameText.getText().trim();
+        String password = new String(passwordText.getPassword()).trim();
+        String conPassword = new String(conPasswordText.getPassword()).trim();
 
         errorLabel.setVisible(false); // reset error message
 
-        if (from.isEmpty() || to.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty() || conPassword.isEmpty()) {
             showError("The username, password, or confirm password cannot be empty.");
+        } else if (!password.equalsIgnoreCase(conPassword)) {
+            showError("Password and Confirm Password do not match.");
         } else {
             // Success: return to login page
-            app.changeScene("HomePage");
+            app.changeScene("login");
         }
     }
 }

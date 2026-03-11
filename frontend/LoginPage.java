@@ -27,7 +27,7 @@ public class LoginPage extends JPanel {
         // Use absolute positioning
         setLayout(null);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-
+        
         // ------------------------------
         // Load background image once
         // ------------------------------
@@ -38,9 +38,10 @@ public class LoginPage extends JPanel {
         }
 
         // ------------------------------
-        // Add the login form panel
+        // Add the login form and group name panel
         // ------------------------------
         add(createLoginPanel());
+        add(displayGroup());
     }
 
     // ------------------------------
@@ -52,6 +53,27 @@ public class LoginPage extends JPanel {
         if (backgroundImage != null) {
             g.drawImage(backgroundImage, 0, 0, WIDTH, HEIGHT, this);
         }
+    }
+
+    private JPanel displayGroup() {
+        int panelWidth = 300;
+        int panelHeight = 80;
+        int marginFromBottom = 500;
+
+        // Center horizontally and offset from bottom
+        int panelX = (WIDTH - panelWidth) / 2;
+        int panelY = HEIGHT - panelHeight - marginFromBottom; 
+
+        JPanel panel = new JPanel(null);
+        panel.setBounds(panelX, panelY, panelWidth, panelHeight);
+
+        JLabel groupName = new JLabel("GROUP 5 (●'◡'●)");
+        groupName.setBounds(10, 0, 300, 80);
+        groupName.setFont(new Font("SansSerif", Font.BOLD, 32));
+        groupName.setForeground(Color.RED);
+        panel.add(groupName);
+
+        return panel;
     }
 
     // ------------------------------
@@ -111,24 +133,38 @@ public class LoginPage extends JPanel {
         panel.add(errorLabel);
 
         // ------------------------------
+        // "Create Account" button
+        // ------------------------------
+        JButton createAccount = new JButton("Create Account");
+        createAccount.setBounds((panelWidth / 2) - 75, 155, 150, 30);
+        createAccount.setForeground(new Color(50, 50, 100));
+        createAccount.setOpaque(false);
+        createAccount.setContentAreaFilled(false);
+        createAccount.setBorderPainted(false);
+        createAccount.addActionListener(e -> clearScene("createAccount")); // switch scene
+        panel.add(createAccount);
+
+        // ------------------------------
+        // "Forgot Password?" button
+        // ------------------------------
+        JButton forgotButton = new JButton("Forgot Password?");
+        forgotButton.setBounds(5, 180, 150, 30);
+        forgotButton.setForeground(new Color(50, 50, 100));
+        forgotButton.setOpaque(false);
+        forgotButton.setContentAreaFilled(false);
+        forgotButton.setBorderPainted(false);
+        forgotButton.addActionListener(e -> clearScene("forgotPassword")); // switch scene
+        panel.add(forgotButton);
+
+        // ------------------------------
         // "Sign In" button
         // ------------------------------
         JButton loginButton = new JButton("Sign In");
-        loginButton.setBounds(125, 150, 100, 30);
+        loginButton.setBounds((panelWidth / 2) - 75, 130, 150, 30);
         loginButton.setForeground(Color.WHITE);
         loginButton.setBackground(new Color(50, 50, 100));
         loginButton.addActionListener(e -> handleLogin()); // validate login
         panel.add(loginButton);
-
-        // ------------------------------
-        // "Create Account" button
-        // ------------------------------
-        JButton createAccount = new JButton("Create Account");
-        createAccount.setBounds(255, 150, 150, 30);
-        createAccount.setForeground(Color.WHITE);
-        createAccount.setBackground(new Color(50, 50, 100));
-        createAccount.addActionListener(e -> clearScene("createAccount")); // switch scene
-        panel.add(createAccount);
 
         return panel;
     }
@@ -166,7 +202,7 @@ public class LoginPage extends JPanel {
             showError("Incorrect username or password.");
         } else {
             // Success: switch to change password page
-            app.changeScene("changePassword");
+            app.changeScene("settingPage");
         }
     }
 }

@@ -13,11 +13,15 @@ public class App extends JFrame {
         // Add screens
         container.add(new LoginPage(this), "login");
         container.add(new ChangePassword(this), "changePassword");
-        container.add(new CreateAccountPage(this), "createAccount");
-
+        container.add(new CreateAccountPage(this), "createAccount");    
+        container.add(new ForgotPassword(this), "forgotPassword");
+        container.add(new HomePage(this), "homePage");
+        container.add(new ChangeFavRoute(this), "changeFavRoute");
+        container.add(new ChangeUsername(this), "changeUsername");
+        container.add(new SettingPage(this), "settingPage");
         add(container);
 
-        setTitle("Swing App");
+        setTitle("GPS APP");
         setSize(1000, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);

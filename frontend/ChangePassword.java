@@ -1,43 +1,133 @@
 import java.awt.*;
-import java.io.*;
-import javax.imageio.*;
 import javax.swing.*;
 
 public class ChangePassword extends JPanel {
-    private static final int WIDTH = 1000;
-    private static final int HEIGHT = 800;
+    private static final int WIDTH = 1000;   // Panel width
+    private static final int HEIGHT = 800;   // Panel height
+
+    // Input fields for the account creation form
+    private JPasswordField passwordText;
+    private JPasswordField conPasswordText;
+
+    // Label to display error messages
+    private JLabel errorLabel;
+
+    // Reference to the main application to switch scenes
     final private App app;
 
     public ChangePassword(App app) {
         this.app = app;
 
+        // Use absolute positioning
         setLayout(null);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        setBackground(Color.GRAY);
+        
+        // ------------------------------
+        // Back Button at top-left corner
+        // ------------------------------
+        JButton backButton = new JButton("Back");
+        backButton.setBounds(25, 25, 90, 30); // Position at top-left
+        backButton.setForeground(Color.WHITE);
+        backButton.setBackground(new Color(80, 80, 80));
+        backButton.addActionListener(e -> clearScene("settingPage")); // Return to login page
+        add(backButton);
 
-        // Create background JLabel and add to this JPanel
-        JLabel backgroundLabel = setBackground("Background/NoBitches.jpg");
-        add(backgroundLabel);
-    }
-
-    /**
-     * Sets background image inside a JLabel
-     */
-    private JLabel setBackground(String path) {
-        JLabel backgroundLabel = new JLabel();
-        backgroundLabel.setLayout(null); // Allows absolute positioning
-
-        try {
-            ImageIcon background = new ImageIcon(ImageIO.read(new File(path)));
-            backgroundLabel.setIcon(background);
-            backgroundLabel.setBounds(0, 0, WIDTH, HEIGHT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return backgroundLabel;
+        add(createChangePasswordPanel());
     }
 
     private JPanel createChangePasswordPanel() {
-        return null;
+        int panelWidth = 500;
+        int panelHeight = 300;
+        int marginFromBottom = 400;
+
+        // Center horizontally, offset from bottom
+        int panelX = (WIDTH - panelWidth) / 2;
+        int panelY = HEIGHT - panelHeight - marginFromBottom;
+
+        // Transparent panel with white background and some alpha
+        JPanel panel = new JPanel(null);
+        panel.setOpaque(false);
+        panel.setBounds(panelX, panelY, panelWidth, panelHeight);
+
+        // ------------------------------
+        // Password field
+        // ------------------------------
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setBounds(25, 60, 100, 25);
+        panel.add(passLabel);
+
+        passwordText = new JPasswordField();
+        passwordText.setBounds(25, 80, 450, 25);
+        panel.add(passwordText);
+
+        // ------------------------------
+        // Confirm password field
+        // ------------------------------
+        JLabel conPassLabel = new JLabel("Confirm Password:");
+        conPassLabel.setBounds(25, 110, 150, 25);
+        panel.add(conPassLabel);
+
+        conPasswordText = new JPasswordField();
+        conPasswordText.setBounds(25, 130, 450, 25);
+        panel.add(conPasswordText);
+
+        // ------------------------------
+        // Error message label (initially invisible)
+        // ------------------------------
+        errorLabel = new JLabel("", SwingConstants.CENTER);
+        errorLabel.setBounds(25, 150, 450, 25);
+        errorLabel.setForeground(new Color(180, 0, 0)); // red color
+        errorLabel.setVisible(false);
+        errorLabel.setOpaque(false);
+        panel.add(errorLabel);
+
+        // ------------------------------
+        // "Create Account" button
+        // ------------------------------
+        JButton resetButton = new JButton("Change Password");
+        resetButton.setBounds(150, 200, 200, 30);
+        resetButton.setForeground(Color.WHITE);
+        resetButton.setBackground(new Color(50, 50, 100));
+        resetButton.addActionListener(e -> handleReset()); // Handle account creation
+        panel.add(resetButton);
+
+        return panel;
+    }
+
+    // ------------------------------
+    // Clear errors and inputs and switch scenes
+    // ------------------------------
+    private void clearScene(String page) {
+        passwordText.setText("");
+        conPasswordText.setText("");
+        app.changeScene(page);
+    }
+
+    // ------------------------------
+    // Display error message on form
+    // ------------------------------
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
+
+    // ------------------------------
+    // Handle change password logic
+    // ------------------------------
+    private void handleReset() {
+        String password = new String(passwordText.getPassword()).trim();
+        String conPassword = new String(conPasswordText.getPassword()).trim();
+
+        errorLabel.setVisible(false); // reset error message
+
+        if (password.isEmpty() || conPassword.isEmpty()) {
+            showError("The password, or confirm password cannot be empty.");
+        } else if (!password.equalsIgnoreCase(conPassword)) {
+            showError("Password and Confirm Password do not match.");
+        } else {
+            // Success: return to login page
+            app.changeScene("login");
+        }
     }
 }
