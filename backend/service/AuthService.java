@@ -59,13 +59,20 @@ public class AuthService {
     }
 
     //updates a pasword 
-    public boolean resetPassword(String email, String newPassword) throws Exception {
-
-        String salt = generateSalt();
-        String hash = hashPassword(newPassword, salt);
-
-        return sqlHandler.updatePassword(email, hash, salt);
+   public boolean resetPassword(String email, String newPassword) throws Exception {
+    if (email == null || email.trim().isEmpty()) {
+        throw new IllegalArgumentException("Email is required.");
     }
+
+    if (newPassword == null || newPassword.length() < 8) {
+        throw new IllegalArgumentException("Password must be at least 8 characters with a special character, uppercase, lowercase letter, and a number.");
+    }
+
+    String salt = generateSalt();
+    String hash = hashPassword(newPassword, salt);
+
+    return sqlHandler.updatePassword(email.trim(), hash, salt);
+}
 
     private String generateSalt() {
         byte[] salt = new byte[16];

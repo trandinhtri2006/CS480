@@ -14,7 +14,7 @@ public class FavoriteRouteSummary {
     }
 
     public FavoriteRouteSummary(int routeId,String favoriteName, String originAddress, String destinationAddress,
-     int chosenRouteInde, String chosenOverviewPolyline) {
+     int chosenRouteIndex, String chosenOverviewPolyline) {
         this.routeId = routeId;
         this.favoriteName = favoriteName;
         this.originAddress = originAddress;
