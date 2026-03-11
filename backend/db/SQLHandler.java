@@ -7,8 +7,6 @@ import model.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -115,17 +113,6 @@ private String loadSchemaSql() throws IOException {
 
     return statements;
 }
-
-    private String readAll(Reader reader) throws IOException {
-        StringBuilder builder = new StringBuilder();
-        try (BufferedReader bufferedReader = new BufferedReader(reader)) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                builder.append(line).append('\n');
-            }
-        }
-        return builder.toString();
-    }
 
 
     // USER METHODS
