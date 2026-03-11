@@ -33,6 +33,7 @@ public class ForgotPassword extends JPanel {
         backButton.setBounds(25, 25, 90, 30); // Position at top-left
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
+        backButton.setFocusable(false);
         backButton.addActionListener(e -> clearScene("login")); // Return to login page
         add(backButton);
 
@@ -104,12 +105,13 @@ public class ForgotPassword extends JPanel {
         panel.add(errorLabel);
 
         // ------------------------------
-        // "Create Account" button
+        // "Confirm" button
         // ------------------------------
         JButton resetButton = new JButton("Reset Password");
         resetButton.setBounds(150, 200, 200, 30);
         resetButton.setForeground(Color.WHITE);
         resetButton.setBackground(new Color(50, 50, 100));
+        resetButton.setFocusable(false);
         resetButton.addActionListener(e -> handleReset()); // Handle account creation
         panel.add(resetButton);
 

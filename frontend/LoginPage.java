@@ -146,6 +146,7 @@ public class LoginPage extends JPanel {
         createAccount.setOpaque(false);
         createAccount.setContentAreaFilled(false);
         createAccount.setBorderPainted(false);
+        createAccount.setFocusable(false);
         createAccount.addActionListener(e -> clearScene("createAccount")); // switch scene
         panel.add(createAccount);
 
@@ -158,6 +159,7 @@ public class LoginPage extends JPanel {
         forgotButton.setOpaque(false);
         forgotButton.setContentAreaFilled(false);
         forgotButton.setBorderPainted(false);
+        forgotButton.setFocusable(false);
         forgotButton.addActionListener(e -> clearScene("forgotPassword")); // switch scene
         panel.add(forgotButton);
 
@@ -168,6 +170,7 @@ public class LoginPage extends JPanel {
         loginButton.setBounds((panelWidth / 2) - 75, 130, 150, 30);
         loginButton.setForeground(Color.WHITE);
         loginButton.setBackground(new Color(50, 50, 100));
+        loginButton.setFocusable(false);
         loginButton.addActionListener(e -> handleLogin()); // validate login
         panel.add(loginButton);
 

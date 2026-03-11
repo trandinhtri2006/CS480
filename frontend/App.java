@@ -36,13 +36,13 @@ public class App extends JFrame {
 
         // Add screens
         container.add(new LoginPage(this, authService), "login");
-        container.add(new ChangePassword(this), "changePassword");
         container.add(new CreateAccountPage(this, authService), "createAccount");    
         container.add(new ForgotPassword(this), "forgotPassword");
         container.add(new HomePage(this), "homePage");
+        container.add(new SettingPage(this), "settingPage");
         container.add(new ChangeFavRoute(this), "changeFavRoute");
         container.add(new ChangeUsername(this), "changeUsername");
-        container.add(new SettingPage(this), "settingPage");
+        container.add(new ChangePassword(this), "changePassword");
         add(container);
 
         setTitle("GPS APP");

@@ -46,6 +46,7 @@ public class CreateAccountPage extends JPanel {
         backButton.setBounds(25, 25, 90, 30); // Position at top-left
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
+        backButton.setFocusable(false);
         backButton.addActionListener(e -> clearScene("login")); // Return to login page
         add(backButton);
 
@@ -140,6 +141,7 @@ public class CreateAccountPage extends JPanel {
         createButton.setBounds(175, 200, 150, 30);
         createButton.setForeground(Color.WHITE);
         createButton.setBackground(new Color(50, 50, 100));
+        createButton.setFocusable(false);
         createButton.addActionListener(e -> handlecreate()); // Handle account creation
         panel.add(createButton);
 

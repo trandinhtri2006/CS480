@@ -8,6 +8,7 @@ public class ChangeFavRoute extends JPanel {
     // Input fields for the account creation form
     private JPasswordField fromField;
     private JPasswordField toField;
+    private JPasswordField routeNameField;
 
     // Label to display error messages
     private JLabel errorLabel;
@@ -30,6 +31,7 @@ public class ChangeFavRoute extends JPanel {
         backButton.setBounds(25, 25, 90, 30); // Position at top-left
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
+        backButton.setFocusable(false);
         backButton.addActionListener(e -> clearScene("settingPage")); // Return to login page
         add(backButton);
 
@@ -47,8 +49,18 @@ public class ChangeFavRoute extends JPanel {
 
         // Transparent panel with white background and some alpha
         JPanel panel = new JPanel(null);
-        panel.setOpaque(false);
         panel.setBounds(panelX, panelY, panelWidth, panelHeight);
+
+        // -----------------------------
+        // "Name" Field
+        // -----------------------------
+        JLabel routeNameLabel = new JLabel("Name:");
+        routeNameLabel.setBounds(25, 10, 100, 25);
+        panel.add(routeNameLabel);
+
+        routeNameField = new JPasswordField();
+        routeNameField.setBounds(25, 30, 450, 25);
+        panel.add(routeNameField);
 
         // ------------------------------
         // "From" Field
@@ -89,6 +101,7 @@ public class ChangeFavRoute extends JPanel {
         confirmButton.setBounds(150, 200, 200, 30);
         confirmButton.setForeground(Color.WHITE);
         confirmButton.setBackground(new Color(50, 50, 100));
+        confirmButton.setFocusable(false);
         confirmButton.addActionListener(e -> handleReset()); // Handle account creation
         panel.add(confirmButton);
 
@@ -101,6 +114,7 @@ public class ChangeFavRoute extends JPanel {
     private void clearScene(String page) {
         fromField.setText("");
         toField.setText("");
+        routeNameField.setText("");
         app.changeScene(page);
     }
 
@@ -118,6 +132,7 @@ public class ChangeFavRoute extends JPanel {
     private void handleReset() {
         String from = new String(fromField.getPassword()).trim();
         String to = new String(toField.getPassword()).trim();
+        String routeName = new String(routeNameField.getPassword()).trim();
 
         errorLabel.setVisible(false); // reset error message
 

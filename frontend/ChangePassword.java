@@ -32,6 +32,7 @@ public class ChangePassword extends JPanel {
         backButton.setBounds(25, 25, 90, 30); // Position at top-left
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
+        backButton.setFocusable(false);
         backButton.addActionListener(e -> clearScene("settingPage")); // Return to login page
         add(backButton);
 
@@ -49,48 +50,48 @@ public class ChangePassword extends JPanel {
 
         // Transparent panel with white background and some alpha
         JPanel panel = new JPanel(null);
-        panel.setOpaque(false);
         panel.setBounds(panelX, panelY, panelWidth, panelHeight);
 
         // ------------------------------
         // Password field
         // ------------------------------
         JLabel passLabel = new JLabel("Password:");
-        passLabel.setBounds(25, 60, 100, 25);
+        passLabel.setBounds(25, 30, 100, 25);
         panel.add(passLabel);
 
         passwordText = new JPasswordField();
-        passwordText.setBounds(25, 80, 450, 25);
+        passwordText.setBounds(25, 50, 450, 25);
         panel.add(passwordText);
 
         // ------------------------------
         // Confirm password field
         // ------------------------------
         JLabel conPassLabel = new JLabel("Confirm Password:");
-        conPassLabel.setBounds(25, 110, 150, 25);
+        conPassLabel.setBounds(25, 80, 150, 25);
         panel.add(conPassLabel);
 
         conPasswordText = new JPasswordField();
-        conPasswordText.setBounds(25, 130, 450, 25);
+        conPasswordText.setBounds(25, 100, 450, 25);
         panel.add(conPasswordText);
 
         // ------------------------------
         // Error message label (initially invisible)
         // ------------------------------
         errorLabel = new JLabel("", SwingConstants.CENTER);
-        errorLabel.setBounds(25, 150, 450, 25);
+        errorLabel.setBounds(25, 120, 450, 25);
         errorLabel.setForeground(new Color(180, 0, 0)); // red color
         errorLabel.setVisible(false);
         errorLabel.setOpaque(false);
         panel.add(errorLabel);
 
         // ------------------------------
-        // "Create Account" button
+        // "Confirm" button
         // ------------------------------
         JButton resetButton = new JButton("Change Password");
         resetButton.setBounds(150, 200, 200, 30);
         resetButton.setForeground(Color.WHITE);
         resetButton.setBackground(new Color(50, 50, 100));
+        resetButton.setFocusable(false);
         resetButton.addActionListener(e -> handleReset()); // Handle account creation
         panel.add(resetButton);
 
