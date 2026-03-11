@@ -1,3 +1,5 @@
+import service.AuthService;
+
 import java.awt.*;
 import javax.swing.*;
 
@@ -115,19 +117,34 @@ public class ChangePassword extends JPanel {
     // ------------------------------
     // Handle change password logic
     // ------------------------------
-    private void handleReset() {
-        String password = new String(passwordText.getPassword()).trim();
-        String conPassword = new String(conPasswordText.getPassword()).trim();
+   private void handleReset() {
+    String password = new String(passwordText.getPassword()).trim();
+    String conPassword = new String(conPasswordText.getPassword()).trim();
 
-        errorLabel.setVisible(false); // reset error message
+    errorLabel.setVisible(false);
 
-        if (password.isEmpty() || conPassword.isEmpty()) {
-            showError("The password, or confirm password cannot be empty.");
-        } else if (!password.equalsIgnoreCase(conPassword)) {
-            showError("Password and Confirm Password do not match.");
-        } else {
-            // Success: return to login page
-            app.changeScene("login");
-        }
+    if (password.isEmpty() || conPassword.isEmpty()) {
+        showError("The password or confirm password cannot be empty.");
+        return;
     }
+
+    if (!password.equals(conPassword)) {
+        showError("Password and Confirm Password do not match.");
+        return;
+    }
+
+    try {
+        AuthService authService = app.getAuthService();
+        String username = app.getCurrentUser().getUsername();
+
+        authService.resetPassword(username, password);
+
+        JOptionPane.showMessageDialog(this, "Password changed successfully.");
+        clearScene("login");
+
+    } catch (Exception e) {
+        showError("Failed to change password.");
+    }
+}
+
 }
