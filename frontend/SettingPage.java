@@ -23,6 +23,8 @@ public class SettingPage extends JPanel {
         backButton.setBounds(25, 25, 90, 30); // Position at top-left
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
+        backButton.setBorderPainted(false);
+        backButton.setFocusable(false);
         backButton.addActionListener(e -> clearScene("homePage")); // Return to login page
         add(backButton);
 
@@ -40,56 +42,74 @@ public class SettingPage extends JPanel {
 
         // Transparent panel with white background and some alpha
         JPanel panel = new JPanel(null);
-        panel.setOpaque(false);
         panel.setBounds(panelX, panelY, panelWidth, panelHeight);
 
-        // ---------------------------
+        // --------------------------------
         // Editing username
-        // ---------------------------
-        JLabel usernameLabel = new JLabel();
-        usernameLabel.setText("Username: CHUD1234");
-        usernameLabel.setBounds(10, 10, 250, 30);
-        panel.add(usernameLabel);
+        // --------------------------------
+        JPanel usernamePanel = new JPanel();
+        usernamePanel.setBounds(10, 10, 475, 50);
+        usernamePanel.setBackground(Color.GRAY);
+        usernamePanel.setLayout(new BorderLayout());
 
+        // Edit button on the far left
         JButton usernameButton = new JButton("Edit");
         usernameButton.setOpaque(false);
         usernameButton.setContentAreaFilled(false);
         usernameButton.setBorderPainted(false);
-        usernameButton.setBounds(375, 10, 100, 30);
+        usernameButton.setFocusable(false);
         usernameButton.addActionListener(e -> clearScene("changeUsername"));
-        panel.add(usernameButton);
+        usernamePanel.add(usernameButton, BorderLayout.EAST);
+
+        // Username on the far right
+        JLabel usernameLabel = new JLabel("Username: CHUD1234");
+        usernamePanel.add(usernameLabel, BorderLayout.WEST);
+
+        panel.add(usernamePanel);
 
         // ----------------------------
         // Changing password
         // ----------------------------
+        JPanel passwordPanel = new JPanel();
+        passwordPanel.setBounds(10, 70, 475, 50);
+        passwordPanel.setBackground(Color.GRAY);
+        passwordPanel.setLayout(new BorderLayout());
+
+
         JLabel passwordLabel = new JLabel("Password");
-        passwordLabel.setBounds(10, 50, 100, 30);
-        panel.add(passwordLabel);
+        passwordPanel.add(passwordLabel, BorderLayout.WEST);
 
         JButton passwordButton = new JButton("Edit");
         passwordButton.setOpaque(false);
         passwordButton.setContentAreaFilled(false);
         passwordButton.setBorderPainted(false);
-        passwordButton.setBounds(375, 50, 100, 30);
+        passwordButton.setFocusable(false);
         passwordButton.addActionListener(e -> clearScene("changePassword"));
-        panel.add(passwordButton);
+        passwordPanel.add(passwordButton, BorderLayout.EAST);
 
+        panel.add(passwordPanel);
+        
         // ----------------------------
         // Editing Favorite route
         // ----------------------------
+        JPanel favRoutePanel = new JPanel();
+        favRoutePanel.setBounds(10, 130, 475, 50);
+        favRoutePanel.setBackground(Color.GRAY);
+        favRoutePanel.setLayout(new BorderLayout());
+
         JLabel favRouteLabel = new JLabel("Favorite Route");
-        favRouteLabel.setBounds(10, 90, 100, 30);
-        panel.add(favRouteLabel);
+        favRoutePanel.add(favRouteLabel, BorderLayout.WEST);
 
         JButton favRouteButton = new JButton("Edit");
         favRouteButton.setOpaque(false);
         favRouteButton.setContentAreaFilled(false);
         favRouteButton.setBorderPainted(false);
-        favRouteButton.setBounds(375, 90, 100, 30);
+        favRouteButton.setFocusable(false);
         favRouteButton.addActionListener(e -> clearScene("changeFavRoute"));
-        panel.add(favRouteButton);
+        favRoutePanel.add(favRouteButton, BorderLayout.EAST);
 
-
+        panel.add(favRoutePanel);
+        
         return panel;
     }
 

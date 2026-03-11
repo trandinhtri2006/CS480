@@ -6,8 +6,9 @@ public class ChangeUsername extends JPanel {
     private static final int HEIGHT = 800;   // Panel height
 
     // Input fields for the account creation form
-    private JPasswordField fromField;
-    private JPasswordField toField;
+    private JPasswordField oldUsernameField;
+    private JPasswordField newUsernameField;
+    private JPasswordField passwordField;
 
     // Label to display error messages
     private JLabel errorLabel;
@@ -30,6 +31,7 @@ public class ChangeUsername extends JPanel {
         backButton.setBounds(25, 25, 90, 30); // Position at top-left
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
+        backButton.setFocusable(false);
         backButton.addActionListener(e -> clearScene("settingPage")); // Return to login page
         add(backButton);
 
@@ -47,30 +49,40 @@ public class ChangeUsername extends JPanel {
 
         // Transparent panel with white background and some alpha
         JPanel panel = new JPanel(null);
-        panel.setOpaque(false);
         panel.setBounds(panelX, panelY, panelWidth, panelHeight);
 
         // ------------------------------
-        // "From" Field
+        // "Old Username" Field
         // ------------------------------
-        JLabel fromLabel = new JLabel("From:");
-        fromLabel.setBounds(25, 60, 100, 25);
-        panel.add(fromLabel);
+        JLabel oldUsernameLabel = new JLabel("Old Username:");
+        oldUsernameLabel.setBounds(25, 10, 100, 25);
+        panel.add(oldUsernameLabel);
 
-        fromField = new JPasswordField();
-        fromField.setBounds(25, 80, 450, 25);
-        panel.add(fromField);
+        oldUsernameField = new JPasswordField();
+        oldUsernameField.setBounds(25, 30, 450, 25);
+        panel.add(oldUsernameField);
 
         // ------------------------------
-        // "To" Field
+        // "New username" Field
         // ------------------------------
-        JLabel toLabel = new JLabel("To:");
-        toLabel.setBounds(25, 110, 150, 25);
-        panel.add(toLabel);
+        JLabel newUsernameLabel = new JLabel("New username:");
+        newUsernameLabel.setBounds(25, 60, 150, 25);
+        panel.add(newUsernameLabel);
 
-        toField = new JPasswordField();
-        toField.setBounds(25, 130, 450, 25);
-        panel.add(toField);
+        newUsernameField = new JPasswordField();
+        newUsernameField.setBounds(25, 80, 450, 25);
+        panel.add(newUsernameField);
+
+        // ------------------------------
+        // "Password" Field
+        // ------------------------------
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setBounds(25, 110, 150, 25);
+        panel.add(passwordLabel);
+
+        passwordField = new JPasswordField();
+        passwordField.setBounds(25, 130, 450, 25);
+        panel.add(passwordField);
 
         // ------------------------------
         // Error message label (initially invisible)
@@ -83,12 +95,13 @@ public class ChangeUsername extends JPanel {
         panel.add(errorLabel);
 
         // ------------------------------
-        // "Create Account" button
+        // "Confirm" button
         // ------------------------------
         JButton confirmButton = new JButton("Confirm");
         confirmButton.setBounds(150, 200, 200, 30);
         confirmButton.setForeground(Color.WHITE);
         confirmButton.setBackground(new Color(50, 50, 100));
+        confirmButton.setFocusable(false);
         confirmButton.addActionListener(e -> handleReset()); // Handle account creation
         panel.add(confirmButton);
 
@@ -99,8 +112,8 @@ public class ChangeUsername extends JPanel {
     // Clear errors and inputs and switch scenes
     // ------------------------------
     private void clearScene(String page) {
-        fromField.setText("");
-        toField.setText("");
+        oldUsernameField.setText("");
+        newUsernameField.setText("");
         app.changeScene(page);
     }
 
@@ -116,13 +129,16 @@ public class ChangeUsername extends JPanel {
     // Handle change password logic
     // ------------------------------
     private void handleReset() {
-        String from = new String(fromField.getPassword()).trim();
-        String to = new String(toField.getPassword()).trim();
+        String oldUsername = new String(oldUsernameField.getPassword()).trim();
+        String newUsername = new String(newUsernameField.getPassword()).trim();
+        String password = new String(passwordField.getPassword()).trim();
 
         errorLabel.setVisible(false); // reset error message
 
-        if (from.isEmpty() || to.isEmpty()) {
-            showError("The username, password, or confirm password cannot be empty.");
+        if (oldUsername.isEmpty() || newUsername.isEmpty() || password.isEmpty()) {
+            showError("The old username, new username, or password cannot be empty.");
+        } else if (oldUsername.equalsIgnoreCase(newUsername)) {
+            showError("New username cannot be the same as old username.");    
         } else {
             // Success: return to login page
             app.changeScene("HomePage");
