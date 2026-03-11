@@ -1,3 +1,6 @@
+import model.User;
+import service.AuthService;
+
 import java.awt.*;
 import java.io.*;
 import javax.imageio.*;
@@ -17,12 +20,14 @@ public class LoginPage extends JPanel {
 
     // Reference to the main application to switch scenes
     private final App app;
+    private final AuthService authService;
 
     // Background image
     private Image backgroundImage;
 
-    public LoginPage(App app) {
+    public LoginPage(App app, AuthService authService) {
         this.app = app;
+        this.authService = authService;
 
         // Use absolute positioning
         setLayout(null);
@@ -193,19 +198,29 @@ public class LoginPage extends JPanel {
     // ------------------------------
     // Validate login credentials
     // ------------------------------
-    private void handleLogin() {
-        String username = userText.getText().trim();
-        String password = new String(passText.getPassword()).trim();
+   private void handleLogin() {
+    String username = userText.getText().trim();
+    String password = new String(passText.getPassword()).trim();
 
-        errorLabel.setVisible(false); // reset error message
+    errorLabel.setVisible(false);
 
-        if (username.isEmpty() || password.isEmpty()) {
-            showError("The username or password cannot be empty.");
-        } else if (!username.equals("admin") || !password.equals("1234")) {
+    if (username.isEmpty() || password.isEmpty()) {
+        showError("The username or password cannot be empty.");
+        return;
+    }
+
+    try {
+        User user = authService.loginUser(username, password);
+
+        if (user == null) {
             showError("Incorrect username or password.");
         } else {
-            // Success: switch to change password page
-            app.changeScene("settingPage");
+            app.setCurrentUser(user);
+            clearScene("settingPage");
         }
+    } catch (Exception e) {
+        showError("Login failed.");
     }
+}
+
 }

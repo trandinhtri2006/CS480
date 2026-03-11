@@ -140,7 +140,7 @@ public class ChangeFavRoute extends JPanel {
             showError("The username, password, or confirm password cannot be empty.");
         } else {
             // Success: return to login page
-            app.changeScene("HomePage");
+            app.changeScene("homePage");
         }
     }
 }

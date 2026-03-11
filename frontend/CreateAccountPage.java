@@ -1,3 +1,5 @@
+import service.AuthService;
+
 import java.awt.*;
 import java.io.*;
 import javax.imageio.*;
@@ -17,12 +19,14 @@ public class CreateAccountPage extends JPanel {
 
     // Reference to the main application to switch scenes
     final private App app;
+    private final AuthService authService;
 
     // Background image for the panel
     private Image backgroundImage;
 
-    public CreateAccountPage(App app) {
+    public CreateAccountPage(App app, AuthService authService) {
         this.app = app;
+        this.authService = authService;
 
         // Use absolute positioning
         setLayout(null);
@@ -166,20 +170,33 @@ public class CreateAccountPage extends JPanel {
     // ------------------------------
     // Handle account creation logic
     // ------------------------------
-    private void handlecreate() {
-        String username = usernameText.getText().trim();
-        String password = new String(passwordText.getPassword()).trim();
-        String conPassword = new String(conPasswordText.getPassword()).trim();
+  private void handlecreate() {
+    String username = usernameText.getText().trim();
+    String password = new String(passwordText.getPassword()).trim();
+    String conPassword = new String(conPasswordText.getPassword()).trim();
 
-        errorLabel.setVisible(false); // reset error message
+    errorLabel.setVisible(false);
 
-        if (username.isEmpty() || password.isEmpty() || conPassword.isEmpty()) {
-            showError("The username, password, or confirm password cannot be empty.");
-        } else if (!password.equalsIgnoreCase(conPassword)) {
-            showError("Password and Confirm Password do not match.");
-        } else {
-            // Success: return to login page
-            app.changeScene("login");
-        }
+    if (username.isEmpty() || password.isEmpty() || conPassword.isEmpty()) {
+        showError("The username, password, or confirm password cannot be empty.");
+        return;
     }
+
+    if (!password.equals(conPassword)) {
+        showError("Password and Confirm Password do not match.");
+        return;
+    }
+
+    try {
+        authService.registerUser(username, password);
+        JOptionPane.showMessageDialog(this, "Account created successfully.");
+        clearScene("login");
+    } catch (IllegalArgumentException e) {
+        showError(e.getMessage());
+    } catch (Exception e) {
+        showError("Account creation failed.");
+        
+    }
+}
+
 }

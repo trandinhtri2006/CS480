@@ -1,3 +1,5 @@
+import service.AuthService;
+
 import java.awt.*;
 import javax.swing.*;
 
@@ -138,20 +140,36 @@ public class ForgotPassword extends JPanel {
     // ------------------------------
     // Handle reset password logic
     // ------------------------------
-    private void handleReset() {
-        String username = usernameText.getText().trim();
-        String password = new String(passwordText.getPassword()).trim();
-        String conPassword = new String(conPasswordText.getPassword()).trim();
+private void handleReset() {
+    String username = usernameText.getText().trim();
+    String password = new String(passwordText.getPassword()).trim();
+    String conPassword = new String(conPasswordText.getPassword()).trim();
 
-        errorLabel.setVisible(false); // reset error message
+    errorLabel.setVisible(false);
 
-        if (username.isEmpty() || password.isEmpty() || conPassword.isEmpty()) {
-            showError("The username, password, or confirm password cannot be empty.");
-        } else if (!password.equalsIgnoreCase(conPassword)) {
-            showError("Password and Confirm Password do not match.");
-        } else {
-            // Success: return to login page
-            app.changeScene("login");
-        }
+    if (username.isEmpty() || password.isEmpty() || conPassword.isEmpty()) {
+        showError("The username, password, or confirm password cannot be empty.");
+        return;
+    }
+
+    if (!password.equals(conPassword)) {
+        showError("Password and Confirm Password do not match.");
+        return;
+    }
+
+    try {
+        AuthService authService = app.getAuthService();
+
+        authService.resetPassword(username, password);
+
+        JOptionPane.showMessageDialog(this, "Password reset successfully.");
+        clearScene("login");
+
+    } catch (IllegalArgumentException e) {
+        showError(e.getMessage());
+    } catch (Exception e) {
+        showError("Password reset failed.");
     }
 }
+
+        }
