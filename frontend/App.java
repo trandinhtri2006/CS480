@@ -1,9 +1,3 @@
-<<<<<<< Updated upstream
-
-public class App {
-    public static void main(String[] args) {
-        LoginPage Login = new LoginPage();  
-=======
 import java.awt.*;
 import javax.swing.*;
 import javafx.application.Platform;
@@ -14,6 +8,7 @@ public class App extends JFrame {
     private JPanel container;
 
     public App() {
+
         // Initialize JavaFX toolkit for Swing + JavaFX hybrid
         initJavaFX();
 
@@ -24,7 +19,7 @@ public class App extends JFrame {
         container.add(new LoginPage(this), "login");
         container.add(new ChangePassword(this), "changePassword");
         container.add(new CreateAccountPage(this), "createAccount");
-        container.add(new HomePage(this), "home");
+        container.add(new HomePage(this), "homePage");
 
         add(container);
 
@@ -35,9 +30,7 @@ public class App extends JFrame {
         setVisible(true);
     }
 
-    /**
-     * Switch panels by name
-     */
+    // Method to switch panels
     public void changeScene(String name) {
         cardLayout.show(container, name);
     }
@@ -58,8 +51,6 @@ public class App extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Launch Swing app
         SwingUtilities.invokeLater(App::new);
->>>>>>> Stashed changes
     }
 }
