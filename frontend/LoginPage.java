@@ -37,7 +37,7 @@ public class LoginPage extends JPanel {
         // Load background image once
         // ------------------------------
         try {
-            backgroundImage = ImageIO.read(new File("Background/LoginpageBG.jpg"));
+            backgroundImage = ImageIO.read(new File("frontend/Background/loginpageBG.jpg"));
         } catch (IOException e) {
             e.printStackTrace();
         }
