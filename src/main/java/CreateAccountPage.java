@@ -163,25 +163,50 @@ public class CreateAccountPage extends JPanel {
 
     errorLabel.setVisible(false);
 
-    if (username.isEmpty() || password.isEmpty() || conPassword.isEmpty()) {
-        showError("The username, password, or confirm password cannot be empty.");
-        return;
+    try{
+        switch(AuthService.registerNewUser(username,password,conPassword)){
+            case 1:
+                showError("email required");
+                break;
+            case 2:
+                showError("valid email required");
+                break;
+            case 3: 
+                showError("passwords must match");
+                break;
+            case 4:
+                showError("passwords must be at least 8 characters");
+                break;
+            case 5:
+                showError("password must contain at least 1 uppercase");
+                break;
+            case 6: 
+                showError("password must contain at least 1 lowercase");
+                break;
+            case 7:
+                showError("Password must contain at least 1 number");
+                break;
+            case 8:
+                showError("password must contain at least 1 special character")    
+            case 9:
+                showError("email alrea  dy exists");
+                break;
+            default:
+                 JOptionPane.showMessageDialog(this, "Account created successfully.");
+                clearScene("login");
+                break;
+                
+        }
+    }catch(Exception e){
+        showError("Registration failed" + e.getMessage());
     }
 
-    if (!password.equals(conPassword)) {
-        showError("Password and Confirm Password do not match.");
-        return;
-    }
 
-    try {
-        authService.registerUser(username, password);
-        JOptionPane.showMessageDialog(this, "Account created successfully.");
-        clearScene("login");
-    } catch (IllegalArgumentException e) {
-        showError(e.getMessage());
-    } catch (Exception e) {
-        showError("Account creation failed.");      
-    }
-}
+
+
+
+
+
+  }
 
 }

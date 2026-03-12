@@ -16,27 +16,63 @@ public class AuthService {
     public AuthService(SQLHandler sqlHandler) {
         this.sqlHandler = sqlHandler;
     }
-
+    int bugNum;
    //register a new user 
-    public int registerUser(String email, String password) throws Exception {
+    public int registerNewUser(String email, String password, String conPassword) throws Exception {
 
         if (email == null || email.trim().isEmpty()) {
+            bugNum=1;
             throw new IllegalArgumentException("Email is required.");
-        }
-
-        if (password == null || password.length() < 8) {
+            
+        }else if (!email.matches(".+@.+\\.com")) {
+            bugNum=2;
+            throw new IllegalArgumentException("Valid email is required.");
+            
+        }else if (password == null || password.length() < 8) {
+            bugNum=3;
             throw new IllegalArgumentException("Password must be at least 8 characters.");
+
+         }else if(!password.equals(conPassword)){
+            bugNum=4;
+            throw new IllegalArgumentException("passwords must match");
+  
+        }else if (!password.matches(".*[A-Z].*")) {
+            bugNum=5;
+            throw new IllegalArgumentException("Password must contain at least 1 uppercase character.");
+            
+        }else if (!password.matches(".*[a-z].*")) {
+            bugNum=6;
+            throw new IllegalArgumentException("Password must contain at least 1 lowercase character.");
+            
+        }else if (!password.matches(".*\\d.*")) {
+            bugNum=7;
+            throw new IllegalArgumentException("Password must contain at least 1 number.");
+            
+        }else if (!password.matches(".*[^a-zA-Z0-9].*")) {
+            bugNum = 8;
+            throw new IllegalArgumentException("Password must contain at least 1 special character.");
+
+        }else if (sqlHandler.emailExists(email)) {
+            bugNum=9;
+            throw new IllegalArgumentException("Email already exists.");      
+        }else{
+            String salt = generateSalt();
+            String hash = hashPassword(password, salt);
+            sqlHandler.createUser(email.trim(), hash, salt);
         }
 
-        if (sqlHandler.emailExists(email)) {
-            throw new IllegalArgumentException("Email already exists.");
-        }
+       
 
-        String salt = generateSalt();
-        String hash = hashPassword(password, salt);
 
-        return sqlHandler.createUser(email.trim(), hash, salt);
+
+       
+        return bugNum;
     }
+
+
+
+
+
 
     //authenticate the user 
     public User loginUser(String email, String password) throws Exception {
@@ -57,21 +93,45 @@ public class AuthService {
     }
 
     //updates a pasword 
-   public boolean resetPassword(String email, String newPassword) throws Exception {
-    if (email == null || email.trim().isEmpty()) {
-        throw new IllegalArgumentException("Email is required.");
+   public int resetPassword(String email, String password, String conPassword) throws Exception {
+
+       
+        if (password == null || password.length() < 8) {
+            bugNum=3;
+            throw new IllegalArgumentException("Password must be at least 8 characters.");
+
+         }else if(!password.equals(conPassword)){
+            bugNum=4;
+            throw new IllegalArgumentException("passwords must match");
+  
+        }else if (!password.matches(".*[A-Z].*")) {
+            bugNum=5;
+            throw new IllegalArgumentException("Password must contain at least 1 uppercase character.");
+            
+        }else if (!password.matches(".*[a-z].*")) {
+            bugNum=6;
+            throw new IllegalArgumentException("Password must contain at least 1 lowercase character.");
+            
+        }else if (!password.matches(".*\\d.*")) {
+            bugNum=7;
+            throw new IllegalArgumentException("Password must contain at least 1 number.");
+            
+        }else if (!password.matches(".*[^a-zA-Z0-9].*")) {
+            bugNum = 8;
+            throw new IllegalArgumentException("Password must contain at least 1 special character.");
+
+        }else if (sqlHandler.emailExists(email)) {
+            bugNum=9;
+            throw new IllegalArgumentException("Email already exists.");      
+        }else{
+
+        String salt = generateSalt();
+        String hash = hashPassword(newPassword, salt);
+        sqlHandler.updatePassword(email.trim(), hash, salt);
+        return bugNum;
+        }
     }
-
-    if (newPassword == null || newPassword.length() < 8) {
-        throw new IllegalArgumentException("Password must be at least 8 characters with a special character, uppercase, lowercase letter, and a number.");
-    }
-
-    String salt = generateSalt();
-    String hash = hashPassword(newPassword, salt);
-
-    return sqlHandler.updatePassword(email.trim(), hash, salt);
-}
-
+    
     private String generateSalt() {
         byte[] salt = new byte[16];
         new SecureRandom().nextBytes(salt);
@@ -88,4 +148,16 @@ public class AuthService {
 
         return Base64.getEncoder().encodeToString(hashBytes);
     }
+
+
+
+
+
+
+
+
+
+
+
+
 }
