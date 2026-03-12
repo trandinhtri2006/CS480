@@ -1,6 +1,9 @@
 # Database
 mapapp.db
 
+# Map data (large .osm.pbf files)
+maps/
+
 # Maven build output
 target/
 
