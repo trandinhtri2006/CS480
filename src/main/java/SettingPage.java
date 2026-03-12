@@ -108,7 +108,7 @@ public class SettingPage extends JPanel {
         favRouteButton.setContentAreaFilled(false);
         favRouteButton.setBorderPainted(false);
         favRouteButton.setFocusable(false);
-        favRouteButton.addActionListener(e -> clearScene("changeFavRoute"));
+        favRouteButton.addActionListener(e -> clearScene("favRouteList"));
         favRoutePanel.add(favRouteButton, BorderLayout.EAST);
 
         panel.add(favRoutePanel);
@@ -122,6 +122,7 @@ public class SettingPage extends JPanel {
     // Clear errors and inputs and switch scenes
     // ------------------------------
     private void clearScene(String page) {
+        app.updateFavRouteList(); // Refresh favorite routes page to reflect any changes
         app.changeScene(page);
     }
 }
