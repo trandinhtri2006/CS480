@@ -10,11 +10,10 @@ C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\HomePage.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\LoginPage.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\model\FavoriteRoute.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\model\FavoriteRouteSummary.java
-C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\model\RouteRequest.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\model\RouteResult.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\model\User.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\service\AuthService.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\service\FavoriteService.java
-C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\service\LocationService.java
+C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\service\GeocodingService.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\service\RoutingService.java
 C:\Users\asolo\Desktop\cs480_local\CS480\src\main\java\SettingPage.java
