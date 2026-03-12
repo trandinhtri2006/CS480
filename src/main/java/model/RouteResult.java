@@ -60,8 +60,11 @@ public class RouteResult {
         long totalMinutes = timeMillis / 60000;
         if (totalMinutes < 60) {
             return totalMinutes + " min";
+        } else {
+            long hours = totalMinutes / 60;
+            long minutes = totalMinutes % 60;
+            return hours + " hr " + minutes + " min";
         }
-        return (totalMinutes / 60) + " hr " + (totalMinutes % 60) + " min";
     }
 }
 
