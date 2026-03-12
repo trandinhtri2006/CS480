@@ -7,6 +7,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Geocoding service that resolves street addresses to lat/lon coordinates. Uses
@@ -62,6 +64,8 @@ public class GeocodingService {
             }
         }
 
+
+
         // US Census Bureau geocoder
         result = queryCensusGeocoder(addressText.trim());
         if (result != null) {
@@ -69,6 +73,18 @@ public class GeocodingService {
         }
 
         throw new RuntimeException("Address not found: " + addressText);
+    }
+
+    public List<double[]> getCoordinates(List<String> addresses) throws Exception {
+
+        List<double[]> coords = new ArrayList<>();
+
+        for (String address : addresses) {
+            double[] c = geocode(address); // your existing method
+            coords.add(c);
+        }
+
+        return coords;
     }
 
     private double[] queryNominatim(String urlString) throws Exception {

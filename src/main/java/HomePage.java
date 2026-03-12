@@ -1,24 +1,21 @@
 import model.RouteResult;
 import model.User;
+import org.jxmapviewer.painter.CompoundPainter;
+import org.jxmapviewer.viewer.*;
 import service.FavoriteService;
 import service.GeocodingService;
 import service.RoutingService;
 
 import org.jxmapviewer.JXMapViewer;
-import org.jxmapviewer.viewer.GeoPosition;
-import org.jxmapviewer.viewer.DefaultTileFactory;
-import org.jxmapviewer.viewer.TileFactoryInfo;
-import org.jxmapviewer.painter.Painter;
-
-import com.graphhopper.util.Instruction;
-import com.graphhopper.util.Translation;
-import com.graphhopper.util.TranslationMap;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Set;
+
 
 /**
  * Home page UI with map, search, dynamic waypoints, and routing.
@@ -102,14 +99,40 @@ public class HomePage extends JPanel {
         add(topPanel, BorderLayout.WEST);
 
         // --- Map setup ---
-        TileFactoryInfo info = new org.jxmapviewer.OSMTileFactoryInfo();
-        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+//        TileFactoryInfo info = new org.jxmapviewer.OSMTileFactoryInfo();
+//        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+//        mapViewer = new JXMapViewer();
+//        mapViewer.setTileFactory(tileFactory);
+//        mapViewer.setZoom(4);
+//        mapViewer.setAddressLocation(new GeoPosition(47.6062, -122.3321)); // Default center
+//
+//        add(new JScrollPane(mapViewer), BorderLayout.CENTER);
         mapViewer = new JXMapViewer();
-        mapViewer.setTileFactory(tileFactory);
-        mapViewer.setZoom(4);
-        mapViewer.setAddressLocation(new GeoPosition(47.6062, -122.3321)); // Default center
 
-        add(new JScrollPane(mapViewer), BorderLayout.CENTER);
+        TileFactoryInfo info = new TileFactoryInfo(
+                0, 19, 19,
+                256,
+                true, true,
+                "https://tile.openstreetmap.org",
+                "x", "y", "z"
+        ) {
+            @Override
+            public String getTileUrl(int x, int y, int zoom) {
+                int z = 19 - zoom;
+                return this.baseURL + "/" + z + "/" + x + "/" + y + ".png";
+            }
+        };
+
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        mapViewer.setTileFactory(tileFactory);
+
+        GeoPosition start = new GeoPosition(47.018077, -120.538130);
+        mapViewer.setAddressLocation(start);
+        mapViewer.setZoom(4);
+
+        add(mapViewer, BorderLayout.CENTER);
+
+        setVisible(true);
     }
 
     // --- Add waypoint dynamically ---
@@ -189,57 +212,133 @@ public class HomePage extends JPanel {
         });
     }
 
+//    private void drawRoute(RouteResult result) {
+//        List<GeoPosition> track = result.getPath();
+//
+//        if (track == null || track.isEmpty()) {
+//            return;
+//        }
+//
+//        // Center the map on the route
+//        mapViewer.zoomToBestFit(new HashSet<>(track), 0.7);
+//
+//        // Create route painter
+//        RoutePainter routePainter = new RoutePainter(track);
+//
+//        // Optional: add start/end markers
+//        Set<GeoPosition> markers = new HashSet<>();
+//        markers.add(track.get(0)); // start
+//        markers.add(track.get(track.size() - 1)); // end
+//
+//        Set<Waypoint> waypoints = new HashSet<>();
+//        waypoints.add(new DefaultWaypoint(track.get(0))); // start
+//        waypoints.add(new DefaultWaypoint(track.get(track.size() - 1))); // end
+//
+//        WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<>();
+//        waypointPainter.setWaypoints(waypoints);
+//        waypointPainter.setRenderer((g, map, wp) -> {
+//            Point2D point = map.getTileFactory().geoToPixel(wp.getPosition(), map.getZoom());
+//            g.setColor(Color.BLUE);
+//            g.fillOval((int) point.getX() - 5, (int) point.getY() - 5, 10, 10);
+//        });
+//
+//        // Combine painters
+//        CompoundPainter<JXMapViewer> painters = new CompoundPainter<>();
+//        painters.setPainters(routePainter, waypointPainter);
+//        mapViewer.setOverlayPainter(painters);
+//        mapViewer.repaint();
+//    }
+
+    private void drawRoute(RouteResult result) {
+
+        List<GeoPosition> track = result.getPath();
+
+        if (track == null || track.isEmpty()) {
+            return;
+        }
+
+        // --- Route line ---
+        RoutePainter routePainter = new RoutePainter(track);
+
+        // --- Waypoint dots ---
+        Set<Waypoint> waypoints = new HashSet<>();
+        for (GeoPosition pos : track) {
+            waypoints.add(new DefaultWaypoint(pos));
+        }
+
+        WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<>();
+        waypointPainter.setWaypoints(waypoints);
+
+        waypointPainter.setRenderer((g, map, wp) -> {
+            Point2D point = map.getTileFactory().geoToPixel(wp.getPosition(), map.getZoom());
+            Rectangle viewport = map.getViewportBounds();
+
+            // Adjust to viewport coordinates
+            int x = (int) (point.getX() - viewport.getX());
+            int y = (int) (point.getY() - viewport.getY());
+
+            // Draw start, end, or intermediate
+            if (wp.getPosition().equals(track.get(0))) {
+                g.setColor(Color.GREEN);
+                g.fillOval(x - 6, y - 6, 12, 12); // larger dot for start
+            } else if (wp.getPosition().equals(track.get(track.size() - 1))) {
+                g.setColor(Color.RED);
+                g.fillOval(x - 6, y - 6, 12, 12); // larger dot for end
+            } else {
+                g.setColor(Color.BLUE);
+                g.fillOval(x - 4, y - 4, 8, 8);    // smaller dot for intermediate waypoints
+            }
+        });
+
+        // --- Combine painters ---
+        CompoundPainter<JXMapViewer> painters = new CompoundPainter<>();
+        painters.setPainters(routePainter, waypointPainter);
+        mapViewer.setOverlayPainter(painters);
+
+        // --- Center and fit map ---
+        mapViewer.zoomToBestFit(new HashSet<>(track), 0.7);
+        mapViewer.repaint();
+    }
+
     // --- Calculate route ---
     private void calculateRoute() {
+
+        String origin = originField.getText().trim();
+        String destination = destinationField.getText().trim();
+
+        if (origin.isEmpty() || origin.equals("Origin") ||
+                destination.isEmpty() || destination.equals("Destination")) {
+            JOptionPane.showMessageDialog(this, "Please enter both origin and destination.");
+            return;
+        }
+
+        List<String> allAddresses = new ArrayList<>();
+        allAddresses.add(origin);
+
+        for (int i = 0; i < waypointFields.size(); i++) {
+            String wp = waypointFields.get(i).getText().trim();
+            if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
+                allAddresses.add(wp);
+            }
+        }
+
+        allAddresses.add(destination);
+
         try {
-            String origin = originField.getText().trim();
-            String destination = destinationField.getText().trim();
 
-            if (origin.isEmpty() || origin.equals("Origin") ||
-                    destination.isEmpty() || destination.equals("Destination")) {
-                JOptionPane.showMessageDialog(this, "Please enter both origin and destination.");
-                return;
-            }
+            // Convert addresses → coordinates
+            List<double[]> allCoords = geocodingService.getCoordinates(allAddresses);
 
-            // Prepare coordinates for routing service
-            List<double[]> routeCoords = new ArrayList<>();
+            // Call routing service with BOTH parameters
+            RouteResult result = routingService.calculateRoute(allCoords, allAddresses);
 
-            routeCoords.add(geocodingService.geocode(origin));
-
-            for (JTextField wpField : waypointFields) {
-                String wpText = wpField.getText().trim();
-                if (!wpText.isEmpty() && !wpText.startsWith("Waypoint")) {
-                    routeCoords.add(geocodingService.geocode(wpText));
-                }
-            }
-
-            routeCoords.add(geocodingService.geocode(destination));
-
-            // --- Call routing service with double[] coordinates ---
-            RouteResult result = routingService.calculateRoute(routeCoords);
-
-            // --- Convert to GeoPositions for map display ---
-            List<GeoPosition> geoPositions = new ArrayList<>();
-            for (double[] c : routeCoords) {
-                geoPositions.add(new GeoPosition(c[0], c[1]));
-            }
-
-            RoutePainter routePainter = new RoutePainter(geoPositions);
-            mapViewer.setOverlayPainter(routePainter);
-            mapViewer.setAddressLocation(geoPositions.get(0));
-
-            // --- Show instructions ---
-            Translation tr = new TranslationMap().get("en");
-            StringBuilder sb = new StringBuilder();
-            for (Instruction instr : result.getInstructions()) {
-                sb.append(instr.getTurnDescription(tr)).append("\n");
-            }
-
-            JOptionPane.showMessageDialog(this, sb.toString(), "Directions", JOptionPane.INFORMATION_MESSAGE);
+            drawRoute(result);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Failed to calculate route:\n" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Routing error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+
 }
