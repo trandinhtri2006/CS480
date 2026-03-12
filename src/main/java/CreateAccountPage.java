@@ -128,7 +128,7 @@ public class CreateAccountPage extends JPanel {
         createButton.setForeground(Color.WHITE);
         createButton.setBackground(new Color(50, 50, 100));
         createButton.setFocusable(false);
-        createButton.addActionListener(e -> handlecreate()); // Handle account creation
+        createButton.addActionListener(e -> handleCreate()); // Handle account creation
         panel.add(createButton);
 
         return panel;
@@ -156,32 +156,33 @@ public class CreateAccountPage extends JPanel {
     // ------------------------------
     // Handle account creation logic
     // ------------------------------
-  private void handlecreate() {
-    String username = usernameText.getText().trim();
-    String password = new String(passwordText.getPassword()).trim();
-    String conPassword = new String(conPasswordText.getPassword()).trim();
+    private void handleCreate() {
+        String email = usernameText.getText().trim();
+        String password = new String(passwordText.getPassword());
+        String confirmPassword = new String(conPasswordText.getPassword());
 
-    errorLabel.setVisible(false);
+        errorLabel.setVisible(false);
 
-    if (username.isEmpty() || password.isEmpty() || conPassword.isEmpty()) {
-        showError("The username, password, or confirm password cannot be empty.");
-        return;
+        // Quick UI check only for confirm password
+        if (!password.equals(confirmPassword)) {
+            showError("Password and Confirm Password do not match.");
+            return;
+        }
+
+        try {
+            authService.registerUser(email, password);
+
+            // If no exception, registration succeeded
+            JOptionPane.showMessageDialog(this, "Account created successfully.");
+            clearScene("login");
+
+        } catch (IllegalArgumentException e) {
+            // Validation errors from service layer
+            showError(e.getMessage());
+
+        } catch (Exception e) {
+            // System/DB errors
+            showError("Account creation failed.");
+        }
     }
-
-    if (!password.equals(conPassword)) {
-        showError("Password and Confirm Password do not match.");
-        return;
-    }
-
-    try {
-        authService.registerUser(username, password);
-        JOptionPane.showMessageDialog(this, "Account created successfully.");
-        clearScene("login");
-    } catch (IllegalArgumentException e) {
-        showError(e.getMessage());
-    } catch (Exception e) {
-        showError("Account creation failed.");      
-    }
-}
-
 }

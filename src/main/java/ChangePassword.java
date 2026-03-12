@@ -138,11 +138,6 @@ public class ChangePassword extends JPanel {
 
         errorLabel.setVisible(false);
 
-        if (password.isEmpty() || conPassword.isEmpty()) {
-            showError("The password or confirm password cannot be empty.");
-            return;
-        }
-
         if (!password.equals(conPassword)) {
             showError("Password and Confirm Password do not match.");
             return;
@@ -157,6 +152,8 @@ public class ChangePassword extends JPanel {
             JOptionPane.showMessageDialog(this, "Password changed successfully.");
             clearScene("login");
 
+        } catch (IllegalAccessException e) {
+            showError(e.getMessage());
         } catch (Exception e) {
             showError("Failed to change password.");
         }

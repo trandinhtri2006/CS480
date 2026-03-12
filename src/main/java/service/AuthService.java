@@ -19,13 +19,55 @@ public class AuthService {
 
    //register a new user 
     public int registerUser(String email, String password) throws Exception {
-
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email is required.");
         }
 
-        if (password == null || password.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters.");
+        // Must be gmail domain
+        if (!email.toLowerCase().endsWith("@gmail.com")) {
+            throw new IllegalArgumentException("Email must be a Gmail address.");
+        }
+
+        // Must be gmail domain
+        if (!email.toLowerCase().endsWith("@gmail.com")) {
+            throw new IllegalArgumentException("Email must be a Gmail address.");
+        }
+
+        // Extract local part (before @)
+        String localPart = email.substring(0, email.indexOf("@"));
+
+        // Local part must be alphanumeric only
+        if (!localPart.matches("[A-Za-z0-9]+")) {
+            throw new IllegalArgumentException("Email username must contain only letters and numbers.");
+        }
+
+        if (password == null) {
+            throw new IllegalArgumentException("Password is required.");
+        }
+
+        // Length: 8–30
+        if (password.length() < 8 || password.length() > 30) {
+            throw new IllegalArgumentException("Password must be 8–30 characters long.");
+        }
+
+        // At least one lowercase
+        if (!password.matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("Password must include at least one lowercase letter.");
+        }
+
+        // At least one uppercase
+        if (!password.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("Password must include at least one uppercase letter.");
+        }
+
+        // At least one digit
+        if (!password.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("Password must include at least one number.");
+        }
+
+        // At least one special character
+        if (!password.matches(".*[^A-Za-z0-9].*")) {
+            throw new IllegalArgumentException("Password must include at least one special character.");
         }
 
         if (sqlHandler.emailExists(email)) {
@@ -34,7 +76,6 @@ public class AuthService {
 
         String salt = generateSalt();
         String hash = hashPassword(password, salt);
-
         return sqlHandler.createUser(email.trim(), hash, salt);
     }
 
@@ -57,20 +98,51 @@ public class AuthService {
     }
 
     //updates a pasword 
-   public boolean resetPassword(String email, String newPassword) throws Exception {
-    if (email == null || email.trim().isEmpty()) {
-        throw new IllegalArgumentException("Email is required.");
+    public boolean resetPassword(String email, String newPassword) throws Exception {
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required.");
+        }
+
+        // Must be gmail domain
+        if (!email.toLowerCase().endsWith("@gmail.com")) {
+            throw new IllegalArgumentException("Email must be a Gmail address.");
+        }
+
+        // Must be gmail domain
+        if (!email.toLowerCase().endsWith("@gmail.com")) {
+            throw new IllegalArgumentException("Email must be a Gmail address.");
+        }
+        
+        // Length: 8–30
+        if (newPassword.length() < 8 || newPassword.length() > 30) {
+            throw new IllegalArgumentException("Password must be 8–30 characters long.");
+        }
+
+        // At least one lowercase
+        if (!newPassword.matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("Password must include at least one lowercase letter.");
+        }
+
+        // At least one uppercase
+        if (!newPassword.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("Password must include at least one uppercase letter.");
+        }
+
+        // At least one digit
+        if (!newPassword.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("Password must include at least one number.");
+        }
+
+        // At least one special character
+        if (!newPassword.matches(".*[^A-Za-z0-9].*")) {
+            throw new IllegalArgumentException("Password must include at least one special character.");
+        }
+
+        String salt = generateSalt();
+        String hash = hashPassword(newPassword, salt);
+
+        return sqlHandler.updatePassword(email.trim(), hash, salt);
     }
-
-    if (newPassword == null || newPassword.length() < 8) {
-        throw new IllegalArgumentException("Password must be at least 8 characters with a special character, uppercase, lowercase letter, and a number.");
-    }
-
-    String salt = generateSalt();
-    String hash = hashPassword(newPassword, salt);
-
-    return sqlHandler.updatePassword(email.trim(), hash, salt);
-}
 
     private String generateSalt() {
         byte[] salt = new byte[16];
