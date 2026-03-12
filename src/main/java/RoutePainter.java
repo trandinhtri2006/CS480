@@ -28,7 +28,7 @@ public class RoutePainter implements Painter<JXMapViewer> {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         g2.setColor(Color.RED);
-        g2.setStroke(new BasicStroke(4));
+        g2.setStroke(new BasicStroke(3));
 
         // Get viewport bounds
         Rectangle viewportBounds = map.getViewportBounds();

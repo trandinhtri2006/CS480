@@ -7,6 +7,8 @@ import service.GeocodingService;
 import service.RoutingService;
 
 import org.jxmapviewer.JXMapViewer;
+import com.graphhopper.util.Instruction;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,6 +29,12 @@ public class HomePage extends JPanel {
     private JTextField destinationField;
     private List<JTextField> waypointFields = new ArrayList<>();
     private JPanel waypointPanel;
+    private JTextArea directionsArea;
+    private JLabel distanceLabel;
+    private JLabel timeLabel;
+    private JList<String> routeList;
+    private DefaultListModel<String> routeListModel;
+    private List<RouteResult> currentRoutes;
 
     private RoutingService routingService;
     private GeocodingService geocodingService;
@@ -93,20 +101,54 @@ public class HomePage extends JPanel {
         routeButton.addActionListener(e -> calculateRoute());
         buttonPanel.add(routeButton);
 
+        // Panel under buttons to show multiple route options
+        routeListModel = new DefaultListModel<>();
+        routeList = new JList<>(routeListModel);
+        routeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Scrollable box for route previews
+        JScrollPane routeScroll = new JScrollPane(routeList);
+        routeScroll.setPreferredSize(new Dimension(400, 150));
+        topPanel.add(Box.createVerticalStrut(10));
+        topPanel.add(new JLabel("Available Routes:"));
+        topPanel.add(routeScroll);
+
+        routeList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && routeList.getSelectedIndex() >= 0) {
+                RouteResult selected = currentRoutes.get(routeList.getSelectedIndex());
+                drawRoute(selected);
+            }
+        });
+
+        distanceLabel = new JLabel("Distance: ");
+        timeLabel = new JLabel("Time: ");
+
+        directionsArea = new JTextArea(8, 40);
+        directionsArea.setEditable(false);
+        directionsArea.setLineWrap(true);
+        directionsArea.setWrapStyleWord(true);
+
+        JScrollPane directionsScroll = new JScrollPane(directionsArea);
+        directionsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        JPanel routeInfoPanel = new JPanel();
+        routeInfoPanel.setLayout(new BorderLayout());
+
+        JPanel summaryPanel = new JPanel(new GridLayout(2,1));
+        summaryPanel.add(distanceLabel);
+        summaryPanel.add(timeLabel);
+
+        routeInfoPanel.add(summaryPanel, BorderLayout.NORTH);
+        routeInfoPanel.add(directionsScroll, BorderLayout.CENTER);
+
+
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(buttonPanel);
 
-        add(topPanel, BorderLayout.WEST);
+        topPanel.add(Box.createVerticalStrut(10));
+        topPanel.add(routeInfoPanel);
 
-        // --- Map setup ---
-//        TileFactoryInfo info = new org.jxmapviewer.OSMTileFactoryInfo();
-//        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-//        mapViewer = new JXMapViewer();
-//        mapViewer.setTileFactory(tileFactory);
-//        mapViewer.setZoom(4);
-//        mapViewer.setAddressLocation(new GeoPosition(47.6062, -122.3321)); // Default center
-//
-//        add(new JScrollPane(mapViewer), BorderLayout.CENTER);
+        add(topPanel, BorderLayout.WEST);
         mapViewer = new JXMapViewer();
 
         TileFactoryInfo info = new TileFactoryInfo(
@@ -249,6 +291,7 @@ public class HomePage extends JPanel {
 //        mapViewer.repaint();
 //    }
 
+
     private void drawRoute(RouteResult result) {
 
         List<GeoPosition> track = result.getPath();
@@ -262,7 +305,9 @@ public class HomePage extends JPanel {
 
         // --- Waypoint dots ---
         Set<Waypoint> waypoints = new HashSet<>();
-        for (GeoPosition pos : track) {
+        GeoPosition[] markers = result.getMarkers();
+
+        for (GeoPosition pos : markers) {
             waypoints.add(new DefaultWaypoint(pos));
         }
 
@@ -270,24 +315,29 @@ public class HomePage extends JPanel {
         waypointPainter.setWaypoints(waypoints);
 
         waypointPainter.setRenderer((g, map, wp) -> {
+
             Point2D point = map.getTileFactory().geoToPixel(wp.getPosition(), map.getZoom());
             Rectangle viewport = map.getViewportBounds();
 
-            // Adjust to viewport coordinates
             int x = (int) (point.getX() - viewport.getX());
             int y = (int) (point.getY() - viewport.getY());
 
-            // Draw start, end, or intermediate
-            if (wp.getPosition().equals(track.get(0))) {
-                g.setColor(Color.GREEN);
-                g.fillOval(x - 6, y - 6, 12, 12); // larger dot for start
-            } else if (wp.getPosition().equals(track.get(track.size() - 1))) {
-                g.setColor(Color.RED);
-                g.fillOval(x - 6, y - 6, 12, 12); // larger dot for end
-            } else {
-                g.setColor(Color.BLUE);
-                g.fillOval(x - 4, y - 4, 8, 8);    // smaller dot for intermediate waypoints
+            int index = track.indexOf(wp.getPosition());
+
+            if (index == 0) {
+                g.setColor(Color.GREEN); // start
             }
+            else if (index == track.size() - 1) {
+                g.setColor(Color.RED); // destination
+            }
+            else {
+                g.setColor(Color.BLUE); // waypoint
+            }
+
+            g.fillOval(x - 7, y - 7, 14, 14);
+
+            g.setColor(Color.WHITE);
+            g.drawString(String.valueOf(index), x - 3, y + 4);
         });
 
         // --- Combine painters ---
@@ -298,6 +348,48 @@ public class HomePage extends JPanel {
         // --- Center and fit map ---
         mapViewer.zoomToBestFit(new HashSet<>(track), 0.7);
         mapViewer.repaint();
+
+
+        StringBuilder directionsText = new StringBuilder();
+        List<Instruction> instructions = result.getInstructions();
+
+        for (int i = 0; i < instructions.size(); i++) {
+            Instruction instr = instructions.get(i);
+
+            // Convert meters → miles
+            double miles = instr.getDistance() / 1609.34;
+            String distanceStr = String.format("%.2f mi", miles);
+
+            // Get turn description (if null, fallback to "continue")
+            String turn = instr.getTurnDescription(routingService.getTranslation());
+            if (turn == null || turn.isBlank()) {
+                turn = "continue";
+            }
+
+            // Append step number, turn, and distance
+            directionsText.append(i + 1)
+                    .append(". ")
+                    .append(turn)
+                    .append(" (")
+                    .append(distanceStr)
+                    .append(")")
+                    .append("\n");
+        }
+
+        // Set the text area
+        directionsArea.setText(directionsText.toString());
+        directionsArea.setCaretPosition(0); // scroll to top
+
+        directionsArea.setText(directionsText.toString());
+
+        distanceLabel.setText("Distance: " + result.getDistanceMiles() + " miles");
+        timeLabel.setText("Time: " + result.getFormattedTime());
+
+        JTextArea directionsArea = new JTextArea(directionsText.toString());
+        directionsArea.setEditable(false);
+
+        JScrollPane scrollPane = new JScrollPane(directionsArea);
+        scrollPane.setPreferredSize(new Dimension(350, 400));
     }
 
     // --- Calculate route ---
@@ -315,8 +407,8 @@ public class HomePage extends JPanel {
         List<String> allAddresses = new ArrayList<>();
         allAddresses.add(origin);
 
-        for (int i = 0; i < waypointFields.size(); i++) {
-            String wp = waypointFields.get(i).getText().trim();
+        for (JTextField wpField : waypointFields) {
+            String wp = wpField.getText().trim();
             if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
                 allAddresses.add(wp);
             }
@@ -325,20 +417,28 @@ public class HomePage extends JPanel {
         allAddresses.add(destination);
 
         try {
-
             // Convert addresses → coordinates
             List<double[]> allCoords = geocodingService.getCoordinates(allAddresses);
 
-            // Call routing service with BOTH parameters
-            RouteResult result = routingService.calculateRoute(allCoords, allAddresses);
+            // Get multiple alternative routes
+            currentRoutes = routingService.calculateRoutes(allCoords, allAddresses, "car");
 
-            drawRoute(result);
+            // Populate the route preview list
+            routeListModel.clear();
+            for (int i = 0; i < currentRoutes.size(); i++) {
+                RouteResult r = currentRoutes.get(i);
+                routeListModel.addElement("Route " + (i + 1) +
+                        " — " + String.format("%.1f mi, %s", r.getDistanceMiles(), r.getFormattedTime()));
+            }
+
+            if (!currentRoutes.isEmpty()) {
+                routeList.setSelectedIndex(0);
+                drawRoute(currentRoutes.get(0)); // show first route by default
+            }
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Routing error: " + e.getMessage());
             e.printStackTrace();
         }
     }
-
-
 }

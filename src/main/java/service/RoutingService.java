@@ -16,6 +16,8 @@ import com.graphhopper.ResponsePath;
 import com.graphhopper.config.Profile;
 import com.graphhopper.json.Statement;
 import com.graphhopper.util.shapes.GHPoint;
+import com.graphhopper.util.Translation;
+import com.graphhopper.util.TranslationMap;
 
 /**
  * Wraps GraphHopper for route calculation. Initialize once with an OSM file,
@@ -24,6 +26,7 @@ import com.graphhopper.util.shapes.GHPoint;
 public class RoutingService {
 
     private final GraphHopper hopper;
+    private final Translation translation;
 
     /**
      * @param osmFile path to the .osm.pbf file
@@ -38,6 +41,9 @@ public class RoutingService {
         customModel.addToSpeed(Statement.If("true", Statement.Op.LIMIT, "100"));
         customModel.addToSpeed(Statement.If("road_class == FOOTWAY || road_class == PATH || road_class == STEPS || road_class == TRACK", Statement.Op.MULTIPLY, "0"));
         hopper.setProfiles(new Profile("car").setCustomModel(customModel).setWeighting("custom"));
+
+        TranslationMap translationMap = new TranslationMap().doImport();
+        translation = translationMap.getWithFallBack(Locale.of("en"));
 
         System.out.println("Importing map data... This may take a moment.");
         hopper.importOrLoad();
@@ -131,7 +137,7 @@ public class RoutingService {
      *
      * @param allCoords list of [lat, lon] arrays in order
      */
-    public RouteResult calculateRoute(List<double[]> allCoords, List<String> allAddresses) throws Exception {
+    public List<RouteResult> calculateRoutes(List<double[]> allCoords, List<String> allAddresses, String profile) throws Exception {
         if (allCoords.size() < 2) {
             throw new IllegalArgumentException("Need at least 2 points for a route");
         }
@@ -140,35 +146,43 @@ public class RoutingService {
         for (double[] c : allCoords) {
             request.addPoint(new GHPoint(c[0], c[1]));
         }
-        request.setProfile("car").setLocale(Locale.US);
+        request.setProfile(profile)
+                .setLocale(Locale.US)
+                .setAlgorithm("alternative_route"); // request multiple alternatives
 
         GHResponse response = hopper.route(request);
         if (response.hasErrors()) {
             throw new RuntimeException("Routing error: " + response.getErrors());
         }
 
-        ResponsePath best = response.getBest();
-        PointList points = best.getPoints();
+        List<RouteResult> results = new ArrayList<>();
+        for (ResponsePath path : response.getAll()) { // get all alternative routes
+            List<GeoPosition> geoPath = new ArrayList<>();
+            PointList points = path.getPoints();
+            for (int i = 0; i < points.size(); i++) {
+                geoPath.add(new GeoPosition(points.getLat(i), points.getLon(i)));
+            }
 
-        List<GeoPosition> path = new ArrayList<>();
-        for (int i = 0; i < points.size(); i++) {
-            path.add(new GeoPosition(points.getLat(i), points.getLon(i)));
+            GeoPosition[] markers = new GeoPosition[allCoords.size()];
+            String[] markerAddresses = new String[allAddresses.size()];
+            for (int i = 0; i < allCoords.size(); i++) {
+                markers[i] = new GeoPosition(allCoords.get(i)[0], allCoords.get(i)[1]);
+                markerAddresses[i] = allAddresses.get(i).trim();
+            }
+
+            results.add(new RouteResult(
+                    geoPath,
+                    markers,
+                    markerAddresses,
+                    path.getInstructions(),
+                    path.getDistance(),
+                    path.getTime()
+            ));
         }
+        return results;
+    }
 
-        GeoPosition[] markers = new GeoPosition[allCoords.size()];
-        String[] markerAddresses = new String[allAddresses.size()]; // <-- make sure this exists
-        for (int i = 0; i < allCoords.size(); i++) {
-            markers[i] = new GeoPosition(allCoords.get(i)[0], allCoords.get(i)[1]);
-            markerAddresses[i] = allAddresses.get(i).trim(); // <-- fixed usage
-        }
-
-        List<Instruction> instructions = new ArrayList<>();
-        Translation tr = new TranslationMap().get("en"); // use correct translation
-        for (Instruction instr : best.getInstructions()) {
-            instructions.add(instr);
-        }
-
-        return new RouteResult(path, markers, markerAddresses, instructions,
-                best.getDistance(), best.getTime());
+    public Translation getTranslation() {
+        return translation;
     }
 }
