@@ -7,7 +7,6 @@ ForgotPassword.class
 GetUserLocation.class
 ChangeUsername.class
 ChangeFavRoute.class
-CreateAccountPage$1.class
 model\FavoriteRouteSummary.class
 LoginPage.class
 CreateAccountPage.class

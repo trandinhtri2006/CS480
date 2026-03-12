@@ -12,3 +12,4 @@ target/
 *.iml
 .vscode/
 *.class
+maps/

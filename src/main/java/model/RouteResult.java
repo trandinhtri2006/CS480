@@ -1,5 +1,6 @@
 package model;
 
+<<<<<<< Updated upstream
 import com.graphhopper.util.Instruction;
 import org.jxmapviewer.viewer.GeoPosition;
 
@@ -68,6 +69,63 @@ public class RouteResult {
             return totalMinutes + " min";
         }
         return (totalMinutes / 60) + " hr " + (totalMinutes % 60) + " min";
+=======
+import org.jxmapviewer.viewer.GeoPosition;
+import com.graphhopper.util.Instruction;
+import java.util.List;
+
+/**
+ * Holds everything the UI needs after a route is calculated:
+ * the path to draw, marker positions, turn-by-turn text,
+ * and total distance / time.
+ */
+public class RouteResult {
+
+    private final List<GeoPosition>  path;             // polyline points
+    private final GeoPosition[]      markers;          // start, waypoints, end
+    private final String[]           markerAddresses;  // human-readable addresses
+    private final List<Instruction>  instructions;     // turn-by-turn (GraphHopper)
+    private final double             distanceMeters;
+    private final long               timeMs;
+
+    public RouteResult(List<GeoPosition> path,
+                       GeoPosition[] markers,
+                       String[] markerAddresses,
+                       List<Instruction> instructions,
+                       double distanceMeters,
+                       long timeMs) {
+        this.path            = path;
+        this.markers         = markers;
+        this.markerAddresses = markerAddresses;
+        this.instructions    = instructions;
+        this.distanceMeters  = distanceMeters;
+        this.timeMs          = timeMs;
+    }
+
+    /* ---- getters ---- */
+    public List<GeoPosition>  getPath()            { return path; }
+    public GeoPosition[]      getMarkers()         { return markers; }
+    public String[]           getMarkerAddresses() { return markerAddresses; }
+    public List<Instruction>  getInstructions()    { return instructions; }
+    public double             getDistanceMeters()  { return distanceMeters; }
+    public long               getTimeMs()          { return timeMs; }
+
+    /* ---- convenience ---- */
+    public double getDistanceKm() {
+        return distanceMeters / 1000.0;
+    }
+
+    public double getDistanceMiles() {
+        return getDistanceKm() * 0.621371;
+    }
+
+    public String getFormattedTime() {
+        long totalSec = timeMs / 1000;
+        long hrs  = totalSec / 3600;
+        long mins = (totalSec % 3600) / 60;
+        if (hrs > 0) return String.format("%d hr %d min", hrs, mins);
+        return String.format("%d min", mins);
+>>>>>>> Stashed changes
     }
 }
 
