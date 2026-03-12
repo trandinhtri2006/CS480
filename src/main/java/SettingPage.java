@@ -2,8 +2,8 @@ import java.awt.*;
 import javax.swing.*;
 
 public class SettingPage extends JPanel {
-    private static final int WIDTH = 1000;   // Panel width
-    private static final int HEIGHT = 800;   // Panel height
+    private static final int WIDTH = 1280;   // Panel width
+    private static final int HEIGHT = 720;   // Panel height
 
     // Reference to the main application to switch scenes
     final private App app;  
@@ -34,7 +34,7 @@ public class SettingPage extends JPanel {
     private JPanel createSettingPage() {
         int panelWidth = 500;
         int panelHeight = 300;
-        int marginFromBottom = 400;
+        int marginFromBottom = 350;
 
         // Center horizontally, offset from bottom
         int panelX = (WIDTH - panelWidth) / 2;
@@ -62,7 +62,8 @@ public class SettingPage extends JPanel {
         usernamePanel.add(usernameButton, BorderLayout.EAST);
 
         // Username on the far right
-        JLabel usernameLabel = new JLabel("Username: CHUD1234");
+        JLabel usernameLabel = new JLabel("Email: " + app.getCurrentUser().getEmail());
+        usernameLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         usernamePanel.add(usernameLabel, BorderLayout.WEST);
 
         panel.add(usernamePanel);
@@ -77,6 +78,7 @@ public class SettingPage extends JPanel {
 
 
         JLabel passwordLabel = new JLabel("Password");
+        passwordLabel.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
         passwordPanel.add(passwordLabel, BorderLayout.WEST);
 
         JButton passwordButton = new JButton("Edit");
@@ -98,6 +100,7 @@ public class SettingPage extends JPanel {
         favRoutePanel.setLayout(new BorderLayout());
 
         JLabel favRouteLabel = new JLabel("Favorite Route");
+        favRouteLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         favRoutePanel.add(favRouteLabel, BorderLayout.WEST);
 
         JButton favRouteButton = new JButton("Edit");

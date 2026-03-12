@@ -3,11 +3,13 @@ import service.AuthService;
 import java.awt.*;
 import javax.swing.*;
 
-public class ChangePassword extends JPanel {
-    private static final int WIDTH = 1000;   // Panel width
-    private static final int HEIGHT = 800;   // Panel height
+import model.User;
 
-    // Input fields for the account creation form
+public class ChangePassword extends JPanel {
+    private static final int WIDTH = 1280;   // Panel width
+    private static final int HEIGHT = 720;   // Panel height
+
+    // Input fields for changing the password
     private JPasswordField passwordText;
     private JPasswordField conPasswordText;
 
@@ -16,6 +18,7 @@ public class ChangePassword extends JPanel {
 
     // Reference to the main application to switch scenes
     final private App app;
+
 
     public ChangePassword(App app) {
         this.app = app;
@@ -94,6 +97,17 @@ public class ChangePassword extends JPanel {
         resetButton.setFocusable(false);
         resetButton.addActionListener(e -> handleReset()); // Handle account creation
         panel.add(resetButton);
+        
+        // ------------------------------
+        // Username Display
+        // ------------------------------
+    
+        User currentUser = app.getCurrentUser();
+        JLabel usernameLabel = new JLabel("Email: " + currentUser.getEmail());
+        usernameLabel.setBounds(25, 10, 450, 25);
+        panel.add(usernameLabel);
+        
+        
 
         return panel;
     }
@@ -118,34 +132,34 @@ public class ChangePassword extends JPanel {
     // ------------------------------
     // Handle change password logic
     // ------------------------------
-   private void handleReset() {
-    String password = new String(passwordText.getPassword()).trim();
-    String conPassword = new String(conPasswordText.getPassword()).trim();
+    private void handleReset() {
+        String password = new String(passwordText.getPassword()).trim();
+        String conPassword = new String(conPasswordText.getPassword()).trim();
 
-    errorLabel.setVisible(false);
+        errorLabel.setVisible(false);
 
-    if (password.isEmpty() || conPassword.isEmpty()) {
-        showError("The password or confirm password cannot be empty.");
-        return;
+        if (password.isEmpty() || conPassword.isEmpty()) {
+            showError("The password or confirm password cannot be empty.");
+            return;
+        }
+
+        if (!password.equals(conPassword)) {
+            showError("Password and Confirm Password do not match.");
+            return;
+        }
+
+        try {
+            AuthService authService = app.getAuthService();
+            String username = app.getCurrentUser().getEmail();
+            
+            authService.resetPassword(username, password);
+
+            JOptionPane.showMessageDialog(this, "Password changed successfully.");
+            clearScene("login");
+
+        } catch (Exception e) {
+            showError("Failed to change password.");
+        }
     }
-
-    if (!password.equals(conPassword)) {
-        showError("Password and Confirm Password do not match.");
-        return;
-    }
-
-    try {
-        AuthService authService = app.getAuthService();
-        String username = app.getCurrentUser().getEmail();
-
-        authService.resetPassword(username, password);
-
-        JOptionPane.showMessageDialog(this, "Password changed successfully.");
-        clearScene("login");
-
-    } catch (Exception e) {
-        showError("Failed to change password.");
-    }
-}
 
 }
