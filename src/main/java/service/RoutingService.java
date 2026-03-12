@@ -38,7 +38,15 @@ public class RoutingService {
         hopper.setGraphHopperLocation(cacheDir);
         hopper.setEncodedValuesString("road_class");
         CustomModel customModel = new CustomModel();
-        customModel.addToSpeed(Statement.If("true", Statement.Op.LIMIT, "100"));
+        customModel.addToSpeed(Statement.If("true", Statement.Op.LIMIT, "50"));
+        customModel.addToSpeed(Statement.If("road_class == FOOTWAY || road_class == PATH || road_class == STEPS || road_class == TRACK", Statement.Op.MULTIPLY, "0"));
+        customModel.addToSpeed(Statement.If("road_class == MOTORWAY", Statement.Op.LIMIT, "100"));
+        customModel.addToSpeed(Statement.If("road_class == TRUNK", Statement.Op.LIMIT, "80"));
+        customModel.addToSpeed(Statement.If("road_class == PRIMARY", Statement.Op.LIMIT, "60"));
+        customModel.addToSpeed(Statement.If("road_class == SECONDARY", Statement.Op.LIMIT, "50"));
+        customModel.addToSpeed(Statement.If("road_class == TERTIARY", Statement.Op.LIMIT, "40"));
+        customModel.addToSpeed(Statement.If("road_class == RESIDENTIAL", Statement.Op.LIMIT, "25"));
+        customModel.addToSpeed(Statement.If("road_class == SERVICE", Statement.Op.LIMIT, "15"));
         customModel.addToSpeed(Statement.If("road_class == FOOTWAY || road_class == PATH || road_class == STEPS || road_class == TRACK", Statement.Op.MULTIPLY, "0"));
         hopper.setProfiles(new Profile("car").setCustomModel(customModel).setWeighting("custom"));
 
