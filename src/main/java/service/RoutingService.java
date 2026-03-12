@@ -1,24 +1,13 @@
 package service;
 
-<<<<<<< Updated upstream
-=======
-//Import Statements
->>>>>>> Stashed changes
 import model.RouteResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-<<<<<<< Updated upstream
 import org.jxmapviewer.viewer.GeoPosition;
 
-=======
-// JXMapViewer
-import org.jxmapviewer.viewer.GeoPosition;
-
-// GraphHopper
->>>>>>> Stashed changes
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
@@ -42,12 +31,7 @@ public class RoutingService {
      * @param osmFile path to the .osm.pbf file
      * @param cacheDir directory for the GraphHopper routing cache
      */
-<<<<<<< Updated upstream
     public RoutingService(String osmFile, String cacheDir) {
-=======
-    public RoutingService(String osmFile, String cacheDir) 
-    {
->>>>>>> Stashed changes
         hopper = new GraphHopper();
         hopper.setOSMFile(osmFile);
         hopper.setGraphHopperLocation(cacheDir);
@@ -68,12 +52,7 @@ public class RoutingService {
      * @return RouteResult with path, markers, instructions, distance, time
      */
     public RouteResult calculateRoute(double[] fromCoords, double[] toCoords,
-<<<<<<< Updated upstream
             String fromAddress, String toAddress) throws Exception {
-=======
-            String fromAddress, String toAddress) throws Exception 
-            {
->>>>>>> Stashed changes
         GHRequest request = new GHRequest()
                 .addPoint(new GHPoint(fromCoords[0], fromCoords[1]))
                 .addPoint(new GHPoint(toCoords[0], toCoords[1]))
@@ -81,7 +60,6 @@ public class RoutingService {
                 .setLocale(Locale.US);
 
         GHResponse response = hopper.route(request);
-<<<<<<< Updated upstream
         if (response.hasErrors()) {
             throw new RuntimeException("Routing error: " + response.getErrors());
         }
@@ -94,35 +72,12 @@ public class RoutingService {
             path.add(new GeoPosition(points.getLat(i), points.getLon(i)));
         }
 
-=======
-        if (response.hasErrors()) 
-        {
-            throw new RuntimeException("Routing error: " + response.getErrors());
-        }
-
-        // Extract the best path and convert to RouteResult
-        ResponsePath best = response.getBest();
-        PointList points = best.getPoints();
-
-        // Convert PointList to List<GeoPosition> for the path
-        List<GeoPosition> path = new ArrayList<>();
-        for (int i = 0; i < points.size(); i++) 
-        {
-            path.add(new GeoPosition(points.getLat(i), points.getLon(i)));
-        }
-
-        // Markers for start and end points
->>>>>>> Stashed changes
         GeoPosition[] markers = {
             new GeoPosition(fromCoords[0], fromCoords[1]),
             new GeoPosition(toCoords[0], toCoords[1])
         };
         String[] markerAddresses = {fromAddress.trim(), toAddress.trim()};
 
-<<<<<<< Updated upstream
-=======
-        // Convert turn-by-turn instructions to a List<Instruction>
->>>>>>> Stashed changes
         List<Instruction> instructions = new ArrayList<>();
         for (Instruction instr : best.getInstructions()) {
             instructions.add(instr);
