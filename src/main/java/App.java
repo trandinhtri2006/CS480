@@ -3,6 +3,8 @@ import model.FavoriteRouteSummary;
 import model.User;
 import service.AuthService;
 import service.FavoriteService;
+import service.GeocodingService;
+import service.RoutingService;
 
 import java.awt.*;
 import javax.swing.*;
@@ -101,13 +103,36 @@ public class App extends JFrame {
         changeScene("login");
     }
 
-    // Lazily load main application pages after login
     public void loadPages() {
-        container.add(new HomePage(this), "homePage");
-        container.add(new SettingPage(this), "settingPage");
-        container.add(new ChangeFavRoute(this), "changeFavRoute");
-        container.add(new ChangeUsername(this), "changeUsername");
-        container.add(new ChangePassword(this), "changePassword");
+        try {
+            // Initialize routing and geocoding services
+            RoutingService routingService = new RoutingService("washington-260309.osm.pbf", "graph-cache");
+            GeocodingService geocodingService = new GeocodingService();
+
+            // Create HomePage with correct service order
+            HomePage homePage = new HomePage(
+                    routingService,
+                    geocodingService,
+                    favoriteService,
+                    currentUser
+            );
+
+            // Add HomePage to card layout
+            container.add(homePage, "homePage");
+
+            // Other pages that require the App reference
+            container.add(new SettingPage(this), "settingPage");
+            container.add(new ChangeFavRoute(this), "changeFavRoute");
+            container.add(new ChangeUsername(this), "changeUsername");
+            container.add(new ChangePassword(this), "changePassword");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Failed to initialize HomePage:\n" + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     // Refresh favorite routes page (recreated to reflect latest data)
