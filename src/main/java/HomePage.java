@@ -18,6 +18,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Home page UI with map, search, dynamic waypoints, and routing.
@@ -200,35 +201,40 @@ public class HomePage extends JPanel {
                 return;
             }
 
-            List<GeoPosition> coordsList = new ArrayList<>();
+            // Prepare coordinates for routing service
+            List<double[]> routeCoords = new ArrayList<>();
 
-            double[] originCoords = geocodingService.geocode(origin);
-            coordsList.add(new GeoPosition(originCoords[0], originCoords[1]));
+            routeCoords.add(geocodingService.geocode(origin));
 
             for (JTextField wpField : waypointFields) {
                 String wpText = wpField.getText().trim();
                 if (!wpText.isEmpty() && !wpText.startsWith("Waypoint")) {
-                    double[] wpCoords = geocodingService.geocode(wpText);
-                    coordsList.add(new GeoPosition(wpCoords[0], wpCoords[1]));
+                    routeCoords.add(geocodingService.geocode(wpText));
                 }
             }
 
-            double[] destCoords = geocodingService.geocode(destination);
-            coordsList.add(new GeoPosition(destCoords[0], destCoords[1]));
+            routeCoords.add(geocodingService.geocode(destination));
 
-            RouteResult result = routingService.calculateRoute(coordsList);
+            // --- Call routing service with double[] coordinates ---
+            RouteResult result = routingService.calculateRoute(routeCoords);
 
-            // Draw route
-            RoutePainter routePainter = new RoutePainter(result.getPath());
+            // --- Convert to GeoPositions for map display ---
+            List<GeoPosition> geoPositions = new ArrayList<>();
+            for (double[] c : routeCoords) {
+                geoPositions.add(new GeoPosition(c[0], c[1]));
+            }
+
+            RoutePainter routePainter = new RoutePainter(geoPositions);
             mapViewer.setOverlayPainter(routePainter);
-            mapViewer.setAddressLocation(result.getPath().get(0));
+            mapViewer.setAddressLocation(geoPositions.get(0));
 
-            // Show instructions
-            Translation tr = TranslationMap.t().getWithFallBack("en");
+            // --- Show instructions ---
+            Translation tr = new TranslationMap().get("en");
             StringBuilder sb = new StringBuilder();
             for (Instruction instr : result.getInstructions()) {
                 sb.append(instr.getTurnDescription(tr)).append("\n");
             }
+
             JOptionPane.showMessageDialog(this, sb.toString(), "Directions", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {

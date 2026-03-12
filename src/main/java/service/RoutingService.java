@@ -1,5 +1,6 @@
 package service;
 
+import com.graphhopper.util.*;
 import model.RouteResult;
 
 import java.util.ArrayList;
@@ -14,9 +15,6 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.ResponsePath;
 import com.graphhopper.config.Profile;
 import com.graphhopper.json.Statement;
-import com.graphhopper.util.CustomModel;
-import com.graphhopper.util.Instruction;
-import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
 
 /**
@@ -132,7 +130,6 @@ public class RoutingService {
      * Calculate a route through any number of points (2 or more).
      *
      * @param allCoords list of [lat, lon] arrays in order
-     * @param allAddresses list of address strings in the same order
      */
     public RouteResult calculateRoute(List<double[]> allCoords, List<String> allAddresses) throws Exception {
         if (allCoords.size() < 2) {
@@ -159,13 +156,14 @@ public class RoutingService {
         }
 
         GeoPosition[] markers = new GeoPosition[allCoords.size()];
-        String[] markerAddresses = new String[allAddresses.size()];
+        String[] markerAddresses = new String[allAddresses.size()]; // <-- make sure this exists
         for (int i = 0; i < allCoords.size(); i++) {
             markers[i] = new GeoPosition(allCoords.get(i)[0], allCoords.get(i)[1]);
-            markerAddresses[i] = allAddresses.get(i).trim();
+            markerAddresses[i] = allAddresses.get(i).trim(); // <-- fixed usage
         }
 
         List<Instruction> instructions = new ArrayList<>();
+        Translation tr = new TranslationMap().get("en"); // use correct translation
         for (Instruction instr : best.getInstructions()) {
             instructions.add(instr);
         }
