@@ -357,68 +357,61 @@ public class HomePage extends JPanel {
         });
 
         JMenuItem addFavorite = new JMenuItem("Add Current Route");
-        addFavorite.addActionListener(e -> {
-            if (currentRoutes == null || currentRoutes.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No route calculated to add as favorite.");
-                return;
-            }
+addFavorite.addActionListener(e -> {
+    if (currentRoutes == null || currentRoutes.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No route calculated to add as favorite.");
+        return;
+    }
 
-            int selectedIndex = routeList.getSelectedIndex();
-            if (selectedIndex < 0 || selectedIndex >= currentRoutes.size()) {
-                selectedIndex = 0; // fallback to first route
-            }
+    int selectedIndex = routeList.getSelectedIndex();
+    if (selectedIndex < 0 || selectedIndex >= currentRoutes.size()) {
+        selectedIndex = 0; // fallback to first route
+    }
 
-            RouteResult selectedRoute = currentRoutes.get(selectedIndex);
+    RouteResult selectedRoute = currentRoutes.get(selectedIndex);
 
-            // Prompt user for favorite name
-            String favName = JOptionPane.showInputDialog(this,
-                    "Enter a name for this favorite route:",
-                    "Favorite Route Name",
-                    JOptionPane.PLAIN_MESSAGE);
+    // Prompt user for favorite name
+    String favName = JOptionPane.showInputDialog(this,
+            "Enter a name for this favorite route:",
+            "Favorite Route Name",
+            JOptionPane.PLAIN_MESSAGE);
 
-            if (favName == null) {
-                return; // User canceled
-            }
+    if (favName == null) {
+        return; // User canceled
+    }
 
-            favName = favName.trim();
-            if (favName.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Favorite name cannot be empty.",
-                        "Invalid Name",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+    favName = favName.trim();
 
-            // Build FavoriteRoute object
-            FavoriteRoute fav = new FavoriteRoute();
-            fav.setUserId(currentUser.getUserId());
-            fav.setOriginAddress(originField.getText().trim());
-            fav.setDestinationAddress(destinationField.getText().trim());
-            fav.setFavoriteName(favName);
-            fav.setChosenRouteIndex(selectedIndex);
+    // Build FavoriteRoute object
+    FavoriteRoute fav = new FavoriteRoute();
+    fav.setUserId(currentUser.getUserId());
+    fav.setOriginAddress(originField.getText().trim());
+    fav.setDestinationAddress(destinationField.getText().trim());
+    fav.setFavoriteName(favName);
+    fav.setChosenRouteIndex(selectedIndex);
 
-            List<String> waypoints = new ArrayList<>();
-            for (JTextField wpField : waypointFields) {
-                String wp = wpField.getText().trim();
-                if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
-                    waypoints.add(wp);
-                }
-            }
-            fav.setWaypoints(waypoints);
+    List<String> waypoints = new ArrayList<>();
+    for (JTextField wpField : waypointFields) {
+        String wp = wpField.getText().trim();
+        if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
+            waypoints.add(wp);
+        }
+    }
+    fav.setWaypoints(waypoints);
 
-            fav.setChosenOverviewPolyline(""); // satisfy NOT NULL, we don’t use it
+    fav.setChosenOverviewPolyline(""); // satisfy NOT NULL, we don’t use it
 
-            try {
-                favoriteService.saveFavorite(fav);
-                JOptionPane.showMessageDialog(this, "Route added to favorites!");
-                app.updateFavRouteList(); // Refresh favorites page
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Failed to save favorite route:\n" + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        });
+    try {
+        favoriteService.saveFavorite(fav);
+        JOptionPane.showMessageDialog(this, "Route added to favorites!");
+        app.updateFavRouteList(); // Refresh favorites page
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this,
+                "Failed to save favorite route:\n" + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace();
+    }
+});
 
         favoritesMenu.add(viewFavorites);
         favoritesMenu.add(addFavorite);
