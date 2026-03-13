@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.io.*;
+import javax.imageio.*;
 import javax.swing.*;
 
 public class SettingPage extends JPanel {
@@ -6,7 +8,10 @@ public class SettingPage extends JPanel {
     private static final int HEIGHT = 720;   // Panel height
 
     // Reference to the main application to switch scenes
-    final private App app;  
+    final private App app;
+
+    // Background image
+    private Image backgroundImage;
 
     public SettingPage(App app) {
         this.app = app;
@@ -14,7 +19,13 @@ public class SettingPage extends JPanel {
         // Use absolute positioning
         setLayout(null);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setBackground(Color.GRAY);
+
+        // Load background image
+        try {
+            backgroundImage = ImageIO.read(new File("src/main/resources/Background/loginpageBG.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // ------------------------------
         // Back Button at top-left corner
@@ -114,6 +125,14 @@ public class SettingPage extends JPanel {
     // ------------------------------
     // Clear errors and inputs and switch scenes
     // ------------------------------
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, WIDTH, HEIGHT, this);
+        }
+    }
+
     private void clearScene(String page) {
         app.updateFavRouteList(); // Refresh favorite routes page to reflect any changes
         app.changeScene(page);

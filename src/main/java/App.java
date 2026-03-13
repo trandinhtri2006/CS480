@@ -8,6 +8,7 @@ import service.GeocodingService;
 import service.RoutingService;
 
 import java.awt.*;
+import java.io.*;
 import java.sql.SQLException;
 import javax.swing.*;
 
@@ -139,7 +140,13 @@ public class App extends JFrame {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws Exception {
-                RoutingService routingService = new RoutingService("maps/washington-260309.osm.pbf", "graph-cache");
+                // Dynamically find the map file in the maps folder
+                File mapsDir = new File("maps");
+                File[] mapFiles = mapsDir.listFiles((dir, name) -> name.endsWith(".osm.pbf") || name.endsWith(".osm"));
+                if (mapFiles == null || mapFiles.length == 0) {
+                    throw new FileNotFoundException("No map file found in the 'maps' folder.");
+                }
+                RoutingService routingService = new RoutingService(mapFiles[0].getPath(), "graph-cache");
                 GeocodingService geocodingService = new GeocodingService();
 
                 homePage = new HomePage(

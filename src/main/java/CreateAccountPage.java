@@ -31,7 +31,13 @@ public class CreateAccountPage extends JPanel {
         // Use absolute positioning
         setLayout(null);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setBackground(Color.GRAY);
+
+        // Load background image
+        try {
+            backgroundImage = ImageIO.read(new File("src/main/resources/Background/loginpageBG.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // ------------------------------
         // Back Button at top-left corner
