@@ -90,6 +90,16 @@ public class FavoriteService {
         return sqlHandler.deleteFavorite(routeId, userId);
     }
 
+    public void updateFavoriteRouteName(int routeId, int userId, String newName) throws SQLException {
+        if (newName == null || newName.isEmpty()) {
+            throw new IllegalArgumentException("Route name cannot be empty");
+        }
+        boolean success = sqlHandler.renameFavorite(routeId, userId, newName);
+        if (!success) {
+            throw new SQLException("Failed to update favorite route name in database.");
+        }
+    }
+
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

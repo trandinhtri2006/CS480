@@ -34,7 +34,7 @@ public class FavRouteList extends JPanel {
         backButton.setBackground(new Color(80, 80, 80));
         backButton.setBorderPainted(false);
         backButton.setFocusable(false);
-        backButton.addActionListener(e -> clearScene("settingPage")); // Return to setting page
+        backButton.addActionListener(e -> clearScene("homePage"));
         add(backButton);
 
         add(createFavRoutePanel());
@@ -119,11 +119,8 @@ public class FavRouteList extends JPanel {
 
         JButton editButton = new JButton("Edit");
         editButton.addActionListener(e -> {
-            // Store selected route for editing
-            app.setSelectedFavoriteRoute(route);
-
-            // Navigate to edit screen
-            app.changeScene("changeFavRoute");
+            app.setEditingRoute(route);
+            app.openEditFavoriteRoute(route);
         });
 
         row.add(nameLabel, BorderLayout.CENTER);

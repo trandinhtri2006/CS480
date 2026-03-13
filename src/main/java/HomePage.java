@@ -1,3 +1,5 @@
+import model.FavoriteRoute;
+import model.FavoriteRouteSummary;
 import model.RouteResult;
 import model.User;
 import org.jxmapviewer.painter.CompoundPainter;
@@ -337,22 +339,99 @@ public class HomePage extends JPanel {
 
         JMenuBar menuBar = new JMenuBar();
 
+        // -------------------------
+        // Favorites menu
+        // -------------------------
         JMenu favoritesMenu = new JMenu("Favorites");
+
         JMenuItem viewFavorites = new JMenuItem("View Favorites");
+        viewFavorites.addActionListener(e -> {
+            app.updateFavRouteList();         // refresh latest favorite routes
+            app.changeScene("favRouteList");  // switch scene
+        });
+
         JMenuItem addFavorite = new JMenuItem("Add Current Route");
+        addFavorite.addActionListener(e -> {
+            if (currentRoutes == null || currentRoutes.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No route calculated to add as favorite.");
+                return;
+            }
+
+            int selectedIndex = routeList.getSelectedIndex();
+            if (selectedIndex < 0 || selectedIndex >= currentRoutes.size()) {
+                selectedIndex = 0; // fallback to first route
+            }
+
+            RouteResult selectedRoute = currentRoutes.get(selectedIndex);
+
+            // Prompt user for favorite name
+            String favName = JOptionPane.showInputDialog(this,
+                    "Enter a name for this favorite route:",
+                    "Favorite Route Name",
+                    JOptionPane.PLAIN_MESSAGE);
+
+            if (favName == null) {
+                return; // User canceled
+            }
+
+            favName = favName.trim();
+            if (favName.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Favorite name cannot be empty.",
+                        "Invalid Name",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Build FavoriteRoute object
+            FavoriteRoute fav = new FavoriteRoute();
+            fav.setUserId(currentUser.getUserId());
+            fav.setOriginAddress(originField.getText().trim());
+            fav.setDestinationAddress(destinationField.getText().trim());
+            fav.setFavoriteName(favName);
+            fav.setChosenRouteIndex(selectedIndex);
+
+            List<String> waypoints = new ArrayList<>();
+            for (JTextField wpField : waypointFields) {
+                String wp = wpField.getText().trim();
+                if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
+                    waypoints.add(wp);
+                }
+            }
+            fav.setWaypoints(waypoints);
+
+            fav.setChosenOverviewPolyline(""); // satisfy NOT NULL, we don’t use it
+
+            try {
+                favoriteService.saveFavorite(fav);
+                JOptionPane.showMessageDialog(this, "Route added to favorites!");
+                app.updateFavRouteList(); // Refresh favorites page
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to save favorite route:\n" + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+
         favoritesMenu.add(viewFavorites);
         favoritesMenu.add(addFavorite);
 
+        // -------------------------
+        // Settings menu
+        // -------------------------
         JMenu settingsMenu = new JMenu("Settings");
+
         JMenuItem accountSettings = new JMenuItem("Account Settings");
-        JMenuItem mapSettings = new JMenuItem("Map Preferences");
+        accountSettings.addActionListener(e -> app.changeScene("settingPage"));
         settingsMenu.add(accountSettings);
-        settingsMenu.add(mapSettings);
 
+        // -------------------------
+        // Account menu
+        // -------------------------
         JMenu userMenu = new JMenu("Account");
-        JMenuItem logoutItem = new JMenuItem("Logout");
-        userMenu.add(logoutItem);
 
+        JMenuItem logoutItem = new JMenuItem("Logout");
         logoutItem.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(
                     this,
@@ -362,15 +441,18 @@ public class HomePage extends JPanel {
             );
 
             if (confirm == JOptionPane.YES_OPTION) {
-                SwingUtilities.getWindowAncestor(this).dispose();
-                new LoginPage(app, authService);
+                app.logout(); // properly clears user and returns to login
             }
         });
 
+        userMenu.add(logoutItem);
+
+        // Add all menus
         menuBar.add(favoritesMenu);
         menuBar.add(settingsMenu);
         menuBar.add(userMenu);
 
+        // Wrap in panel
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.add(menuBar, BorderLayout.CENTER);
 
@@ -449,6 +531,39 @@ public class HomePage extends JPanel {
                 }
             }
         });
+    }
+
+    /**
+     * Loads a full favorite route into the HomePage.
+     */
+    public void loadFavoriteRoute(FavoriteRoute favoriteRoute) {
+        if (favoriteRoute == null) return;
+
+        // Clear existing waypoints
+        for (JTextField wpField : new ArrayList<>(waypointFields)) {
+            removeWaypoint();
+        }
+
+        // Fill origin & destination
+        originField.setText(favoriteRoute.getOriginAddress());
+        destinationField.setText(favoriteRoute.getDestinationAddress());
+
+        // Fill waypoints
+        for (String wp : favoriteRoute.getWaypoints()) {
+            addWaypoint();
+            waypointFields.get(waypointFields.size() - 1).setText(wp);
+        }
+
+        calculateRoute();
+
+        // If you want to select the previously chosen route index:
+        if (currentRoutes != null && !currentRoutes.isEmpty()) {
+            int chosenIndex = favoriteRoute.getChosenRouteIndex();
+            if (chosenIndex >= 0 && chosenIndex < currentRoutes.size()) {
+                routeList.setSelectedIndex(chosenIndex);
+                drawRoute(currentRoutes.get(chosenIndex));
+            }
+        }
     }
 
     private void drawRoute(RouteResult result) {

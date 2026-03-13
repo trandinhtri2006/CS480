@@ -1,4 +1,7 @@
+import model.FavoriteRouteSummary;
+
 import java.awt.*;
+import java.sql.SQLException;
 import javax.swing.*;
 
 public class ChangeFavRoute extends JPanel {
@@ -15,6 +18,7 @@ public class ChangeFavRoute extends JPanel {
 
     // Reference to the main application to switch scenes
     final private App app;
+    private FavoriteRouteSummary editingRoute;
 
     public ChangeFavRoute(App app) {
         this.app = app;
@@ -32,7 +36,7 @@ public class ChangeFavRoute extends JPanel {
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(new Color(80, 80, 80));
         backButton.setFocusable(false);
-        backButton.addActionListener(e -> clearScene("settingPage")); // Return to login page
+        backButton.addActionListener(e -> clearScene("favRouteList")); // Return to login page
         add(backButton);
 
         add(createChangeFavRoutePanel());
@@ -65,7 +69,7 @@ public class ChangeFavRoute extends JPanel {
         // ------------------------------
         // "From" Field
         // ------------------------------
-        JLabel fromLabel = new JLabel("From:");
+        JLabel fromLabel = new JLabel("Origin:");
         fromLabel.setBounds(25, 60, 100, 25);
         panel.add(fromLabel);
 
@@ -76,7 +80,7 @@ public class ChangeFavRoute extends JPanel {
         // ------------------------------
         // "To" Field
         // ------------------------------
-        JLabel toLabel = new JLabel("To:");
+        JLabel toLabel = new JLabel("Destination:");
         toLabel.setBounds(25, 110, 150, 25);
         panel.add(toLabel);
 
@@ -126,21 +130,42 @@ public class ChangeFavRoute extends JPanel {
         errorLabel.setVisible(true);
     }
 
+    public void setEditingRoute(FavoriteRouteSummary route) {
+        this.editingRoute = route;
+        if (route != null) {
+            routeNameField.setText(route.getFavoriteName());
+            fromField.setText(route.getOriginAddress());
+            toField.setText(route.getDestinationAddress());
+        }
+    }
+
     // ------------------------------
     // Handle change password logic
     // ------------------------------
     private void handleReset() {
-        String from = fromField.getText().trim();
-        String to = toField.getText().trim();
         String routeName = routeNameField.getText().trim();
 
-        errorLabel.setVisible(false); // reset error message
+        if (editingRoute == null) {
+            showError("No route selected to edit.");
+            return;
+        }
 
-        if (from.isEmpty() || to.isEmpty()) {
-            showError("The route name, origin, and destination cannot be empty.");
-        } else {
-            // Success: return to login page
-            app.changeScene("homePage");
+        if (routeName.isEmpty()) {
+            showError("Route name cannot be empty.");
+            return;
+        }
+
+        try {
+            app.getFavoriteService().updateFavoriteRouteName(
+                    editingRoute.getRouteId(),
+                    app.getCurrentUser().getUserId(),
+                    routeName
+            );
+            editingRoute.setFavoriteName(routeName); // update local copy
+            app.updateFavRouteList(); // refresh the list page
+            clearScene("favRouteList");
+        } catch (SQLException ex) {
+            showError("Failed to update route: " + ex.getMessage());
         }
     }
 }

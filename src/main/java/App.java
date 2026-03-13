@@ -1,4 +1,5 @@
 import db.SQLHandler;
+import model.FavoriteRoute;
 import model.FavoriteRouteSummary;
 import model.User;
 import service.AuthService;
@@ -7,6 +8,7 @@ import service.GeocodingService;
 import service.RoutingService;
 
 import java.awt.*;
+import java.sql.SQLException;
 import javax.swing.*;
 
 // Main application window (root frame)
@@ -29,6 +31,7 @@ public class App extends JFrame {
     private User currentUser;
 
     private FavoriteRouteSummary selectedFavoriteRoute;
+    private HomePage homePage;
 
     // App constructor — initializes services, UI, and screens
     public App() {
@@ -78,6 +81,8 @@ public class App extends JFrame {
         setVisible(true);
     }
 
+
+
     // Switch visible screen by card name
     public void changeScene(String name) {
         cardLayout.show(container, name);
@@ -116,7 +121,7 @@ public class App extends JFrame {
             GeocodingService geocodingService = new GeocodingService();
 
             // Create HomePage with correct service order
-            HomePage homePage = new HomePage(
+            homePage = new HomePage(
                     this,
                     authService,
                     routingService,
@@ -155,6 +160,47 @@ public class App extends JFrame {
 
     public void setSelectedFavoriteRoute(FavoriteRouteSummary route) {
         this.selectedFavoriteRoute = route;
+    }
+
+    private FavoriteRouteSummary editingRoute;
+
+    public void setEditingRoute(FavoriteRouteSummary route) {
+        this.editingRoute = route;
+    }
+
+    public FavoriteRouteSummary getEditingRoute() {
+        return editingRoute;
+    }
+
+    public void openFavoriteRoute(int routeId) {
+        try {
+            FavoriteRoute fav = favoriteService.getFavoriteRoute(routeId, currentUser.getUserId());
+            homePage.loadFavoriteRoute(fav); // only for “view/run route”
+            changeScene("homePage");
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Failed to load favorite: " + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void openEditFavoriteRoute(FavoriteRouteSummary favSummary) {
+        setSelectedFavoriteRoute(favSummary);  // store the selected route
+        // Create or refresh the edit page with the selected route
+        container.add(new ChangeFavRoute(this), "changeFavRoute");
+        changeScene("changeFavRoute");
+    }
+
+    // Helper to get index of card by name
+    private int findCardIndex(String name) {
+        for (int i = 0; i < container.getComponentCount(); i++) {
+            if (container.getComponent(i).getName() != null &&
+                    container.getComponent(i).getName().equals(name)) {
+                return i;
+            }
+        }
+        return 0; // fallback
     }
 
     // Application entry point (runs UI on Event Dispatch Thread)
