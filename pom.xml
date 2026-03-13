@@ -55,6 +55,10 @@
                 <version>3.3.0</version>
                 <configuration>
                     <mainClass>App</mainClass>
+                    <arguments/>
+                    <jvmArgs>
+                        <jvmArg>-Xmx1g</jvmArg>
+                    </jvmArgs>
                 </configuration>
             </plugin>
 
