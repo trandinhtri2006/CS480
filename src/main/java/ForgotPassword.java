@@ -1,11 +1,13 @@
 import service.AuthService;
 
 import java.awt.*;
+import java.io.*;
+import javax.imageio.*;
 import javax.swing.*;
 
 public class ForgotPassword extends JPanel {
-    private static final int WIDTH = 1000;   // Panel width
-    private static final int HEIGHT = 800;   // Panel height
+    private static final int WIDTH = 1280;   // Panel width
+    private static final int HEIGHT = 720;   // Panel height
 
     // Input fields for the account creation form
     private JTextField usernameText;
@@ -18,13 +20,22 @@ public class ForgotPassword extends JPanel {
     // Reference to the main application to switch scenes
     final private App app;
 
+    // Background image
+    private Image backgroundImage;
+
     public ForgotPassword(App app) {
         this.app = app;
 
         // Use absolute positioning
         setLayout(null);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setBackground(Color.GRAY);
+
+        // Load background image
+        try {
+            backgroundImage = ImageIO.read(new File("src/main/resources/Background/loginpageBG.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
         // ------------------------------
         // Back Button at top-left corner
@@ -38,6 +49,14 @@ public class ForgotPassword extends JPanel {
         add(backButton);
 
         add(createForgotPasswordPanel());
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, WIDTH, HEIGHT, this);
+        }
     }
 
     private JPanel createForgotPasswordPanel() {
