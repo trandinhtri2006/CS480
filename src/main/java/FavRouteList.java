@@ -123,7 +123,7 @@ public class FavRouteList extends JPanel {
 
         JButton renameButton = new JButton("Rename");
         renameButton.addActionListener(e -> {
-            clearScene("changeFavRoute");
+            app.openEditFavoriteRoute(route);
         });
 
         JButton deleteButton = new JButton("Delete");
