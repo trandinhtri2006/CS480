@@ -708,7 +708,7 @@ addFavorite.addActionListener(e -> {
                 drawRoute(currentRoutes.get(0));
             }
 
-        } catch (RuntimeException | Exception e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Unable to find a route. Please check your addresses and try again.",
                     "Route Not Found",
