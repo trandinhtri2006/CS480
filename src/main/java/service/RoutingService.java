@@ -51,7 +51,7 @@ public class RoutingService {
         hopper.setProfiles(new Profile("car").setCustomModel(customModel).setWeighting("custom"));
 
         TranslationMap translationMap = new TranslationMap().doImport();
-        translation = translationMap.getWithFallBack(Locale.of("en"));
+        translation = translationMap.getWithFallBack(Locale.ENGLISH);
 
         System.out.println("Importing map data... This may take a moment.");
         hopper.importOrLoad();
@@ -155,8 +155,11 @@ public class RoutingService {
             request.addPoint(new GHPoint(c[0], c[1]));
         }
         request.setProfile(profile)
-                .setLocale(Locale.US)
-                .setAlgorithm("alternative_route"); // request multiple alternatives
+                .setLocale(Locale.US);
+
+        if (allCoords.size() == 2) {
+            request.setAlgorithm("alternative_route");
+        }
 
         GHResponse response = hopper.route(request);
         if (response.hasErrors()) {

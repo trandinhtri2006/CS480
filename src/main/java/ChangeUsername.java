@@ -6,8 +6,8 @@ public class ChangeUsername extends JPanel {
     private static final int HEIGHT = 800;   // Panel height
 
     // Input fields for the account creation form
-    private JPasswordField oldUsernameField;
-    private JPasswordField newUsernameField;
+    private JTextField oldUsernameField;
+    private JTextField newUsernameField;
     private JPasswordField passwordField;
 
     // Label to display error messages
@@ -58,7 +58,7 @@ public class ChangeUsername extends JPanel {
         oldUsernameLabel.setBounds(25, 10, 100, 25);
         panel.add(oldUsernameLabel);
 
-        oldUsernameField = new JPasswordField();
+        oldUsernameField = new JTextField();
         oldUsernameField.setBounds(25, 30, 450, 25);
         panel.add(oldUsernameField);
 
@@ -69,7 +69,7 @@ public class ChangeUsername extends JPanel {
         newUsernameLabel.setBounds(25, 60, 150, 25);
         panel.add(newUsernameLabel);
 
-        newUsernameField = new JPasswordField();
+        newUsernameField = new JTextField();
         newUsernameField.setBounds(25, 80, 450, 25);
         panel.add(newUsernameField);
 
@@ -129,8 +129,8 @@ public class ChangeUsername extends JPanel {
     // Handle change password logic
     // ------------------------------
     private void handleReset() {
-        String oldUsername = new String(oldUsernameField.getPassword()).trim();
-        String newUsername = new String(newUsernameField.getPassword()).trim();
+        String oldUsername = oldUsernameField.getText().trim();
+        String newUsername = newUsernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
         errorLabel.setVisible(false); // reset error message
@@ -141,7 +141,7 @@ public class ChangeUsername extends JPanel {
             showError("New username cannot be the same as old username.");    
         } else {
             // Success: return to login page
-            app.changeScene("HomePage");
+            app.changeScene("homePage");
         }
     }
 }

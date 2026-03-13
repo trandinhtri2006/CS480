@@ -6,9 +6,9 @@ public class ChangeFavRoute extends JPanel {
     private static final int HEIGHT = 720;   // Panel height
 
     // Input fields for the account creation form
-    private JPasswordField fromField;
-    private JPasswordField toField;
-    private JPasswordField routeNameField;
+    private JTextField fromField;
+    private JTextField toField;
+    private JTextField routeNameField;
 
     // Label to display error messages
     private JLabel errorLabel;
@@ -58,7 +58,7 @@ public class ChangeFavRoute extends JPanel {
         routeNameLabel.setBounds(25, 10, 100, 25);
         panel.add(routeNameLabel);
 
-        routeNameField = new JPasswordField();
+        routeNameField = new JTextField();
         routeNameField.setBounds(25, 30, 450, 25);
         panel.add(routeNameField);
 
@@ -69,7 +69,7 @@ public class ChangeFavRoute extends JPanel {
         fromLabel.setBounds(25, 60, 100, 25);
         panel.add(fromLabel);
 
-        fromField = new JPasswordField();
+        fromField = new JTextField();
         fromField.setBounds(25, 80, 450, 25);
         panel.add(fromField);
 
@@ -80,7 +80,7 @@ public class ChangeFavRoute extends JPanel {
         toLabel.setBounds(25, 110, 150, 25);
         panel.add(toLabel);
 
-        toField = new JPasswordField();
+        toField = new JTextField();
         toField.setBounds(25, 130, 450, 25);
         panel.add(toField);
 
@@ -130,14 +130,14 @@ public class ChangeFavRoute extends JPanel {
     // Handle change password logic
     // ------------------------------
     private void handleReset() {
-        String from = new String(fromField.getPassword()).trim();
-        String to = new String(toField.getPassword()).trim();
-        String routeName = new String(routeNameField.getPassword()).trim();
+        String from = fromField.getText().trim();
+        String to = toField.getText().trim();
+        String routeName = routeNameField.getText().trim();
 
         errorLabel.setVisible(false); // reset error message
 
         if (from.isEmpty() || to.isEmpty()) {
-            showError("The username, password, or confirm password cannot be empty.");
+            showError("The route name, origin, and destination cannot be empty.");
         } else {
             // Success: return to login page
             app.changeScene("homePage");

@@ -152,7 +152,7 @@ public class ChangePassword extends JPanel {
             JOptionPane.showMessageDialog(this, "Password changed successfully.");
             clearScene("login");
 
-        } catch (IllegalAccessException e) {
+        } catch (IllegalArgumentException e) {
             showError(e.getMessage());
         } catch (Exception e) {
             showError("Failed to change password.");

@@ -42,7 +42,7 @@ public class GeocodingService {
             return result;
         }
 
-        // Fallback: free-form query
+        // Fallback: free-form query via Nominatim
         String encodedAddress = URLEncoder.encode(addressText.trim(), StandardCharsets.UTF_8.toString());
         String fallbackUrl = "https://nominatim.openstreetmap.org/search?q=" + encodedAddress
                 + "&format=json&limit=1&addressdetails=1&countrycodes=us";
@@ -51,7 +51,7 @@ public class GeocodingService {
             return result;
         }
 
-        // Drop the street number and try street name + city
+        // Fallback: drop street number, try street name + city
         if (parts.length >= 2) {
             String streetName = parts[0].trim().replaceFirst("^\\d+\\s+", "");
             String reducedQuery = URLEncoder.encode(streetName + ", " + parts[1].trim()
@@ -66,7 +66,7 @@ public class GeocodingService {
 
 
 
-        // US Census Bureau geocoder
+        // Fallback: US Census Bureau geocoder
         result = queryCensusGeocoder(addressText.trim());
         if (result != null) {
             return result;
@@ -160,6 +160,108 @@ public class GeocodingService {
         startIndex += searchTarget.length();
         int endIndex = jsonString.indexOf("\"", startIndex);
         return Double.parseDouble(jsonString.substring(startIndex, endIndex));
+    }
+
+    /**
+     * Reverse geocode coordinates to a human-readable street address.
+     * Returns format: "123 Main Street, City, ST"
+     */
+    public String reverseGeocode(double lat, double lon) {
+        try {
+            String urlString = "https://nominatim.openstreetmap.org/reverse?lat=" + lat
+                    + "&lon=" + lon + "&format=json&addressdetails=1&zoom=18";
+            URL apiURL = URI.create(urlString).toURL();
+            HttpURLConnection connection = (HttpURLConnection) apiURL.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "JavaMapTester/1.0");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            if (connection.getResponseCode() != 200) {
+                return String.format("%.5f, %.5f", lat, lon);
+            }
+
+            StringBuilder jsonResponse = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonResponse.append(line);
+                }
+            }
+
+            String resp = jsonResponse.toString();
+
+            String houseNumber = extractAddressField(resp, "house_number");
+            String road = extractAddressField(resp, "road");
+            String city = extractAddressField(resp, "city");
+            if (city == null) city = extractAddressField(resp, "town");
+            if (city == null) city = extractAddressField(resp, "village");
+            if (city == null) city = extractAddressField(resp, "hamlet");
+            if (city == null) city = extractAddressField(resp, "suburb");
+            if (city == null) city = extractAddressField(resp, "municipality");
+            if (city == null) city = extractAddressField(resp, "county");
+            String state = extractAddressField(resp, "state");
+
+            if (state != null) {
+                state = stateAbbreviation(state);
+            }
+
+            StringBuilder addr = new StringBuilder();
+            if (houseNumber != null && road != null) {
+                addr.append(houseNumber).append(" ").append(road);
+            } else if (road != null) {
+                addr.append(road);
+            }
+            if (city != null) {
+                if (addr.length() > 0) addr.append(", ");
+                addr.append(city);
+            }
+            if (state != null) {
+                if (addr.length() > 0) addr.append(", ");
+                addr.append(state);
+            }
+            return addr.length() > 0 ? addr.toString() : String.format("%.5f, %.5f", lat, lon);
+        } catch (Exception e) {
+            return String.format("%.5f, %.5f", lat, lon);
+        }
+    }
+
+    private String extractAddressField(String json, String field) {
+        int addrStart = json.indexOf("\"address\"");
+        if (addrStart == -1) return null;
+        String addrSection = json.substring(addrStart);
+
+        String key = "\"" + field + "\":\"";
+        int start = addrSection.indexOf(key);
+        if (start == -1) return null;
+        start += key.length();
+        int end = addrSection.indexOf("\"", start);
+        if (end == -1) return null;
+        return addrSection.substring(start, end);
+    }
+
+    private String stateAbbreviation(String state) {
+        return switch (state) {
+            case "Alabama" -> "AL"; case "Alaska" -> "AK"; case "Arizona" -> "AZ";
+            case "Arkansas" -> "AR"; case "California" -> "CA"; case "Colorado" -> "CO";
+            case "Connecticut" -> "CT"; case "Delaware" -> "DE"; case "Florida" -> "FL";
+            case "Georgia" -> "GA"; case "Hawaii" -> "HI"; case "Idaho" -> "ID";
+            case "Illinois" -> "IL"; case "Indiana" -> "IN"; case "Iowa" -> "IA";
+            case "Kansas" -> "KS"; case "Kentucky" -> "KY"; case "Louisiana" -> "LA";
+            case "Maine" -> "ME"; case "Maryland" -> "MD"; case "Massachusetts" -> "MA";
+            case "Michigan" -> "MI"; case "Minnesota" -> "MN"; case "Mississippi" -> "MS";
+            case "Missouri" -> "MO"; case "Montana" -> "MT"; case "Nebraska" -> "NE";
+            case "Nevada" -> "NV"; case "New Hampshire" -> "NH"; case "New Jersey" -> "NJ";
+            case "New Mexico" -> "NM"; case "New York" -> "NY"; case "North Carolina" -> "NC";
+            case "North Dakota" -> "ND"; case "Ohio" -> "OH"; case "Oklahoma" -> "OK";
+            case "Oregon" -> "OR"; case "Pennsylvania" -> "PA"; case "Rhode Island" -> "RI";
+            case "South Carolina" -> "SC"; case "South Dakota" -> "SD"; case "Tennessee" -> "TN";
+            case "Texas" -> "TX"; case "Utah" -> "UT"; case "Vermont" -> "VT";
+            case "Virginia" -> "VA"; case "Washington" -> "WA"; case "West Virginia" -> "WV";
+            case "Wisconsin" -> "WI"; case "Wyoming" -> "WY";
+            case "District of Columbia" -> "DC";
+            default -> state;
+        };
     }
 
     private double parseJsonNumericValue(String json, String key) {
