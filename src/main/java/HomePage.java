@@ -3,6 +3,7 @@ import model.User;
 import org.jxmapviewer.painter.CompoundPainter;
 import org.jxmapviewer.painter.Painter;
 import org.jxmapviewer.viewer.*;
+import service.AuthService;
 import service.FavoriteService;
 import service.GeocodingService;
 import service.RoutingService;
@@ -22,7 +23,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 /**
  * Home page UI with map, search, dynamic waypoints, and routing.
@@ -47,13 +47,16 @@ public class HomePage extends JPanel {
     private GeocodingService geocodingService;
     private FavoriteService favoriteService;
     private User currentUser;
+    private App app;
+    private AuthService authService;
     private BufferedImage backgroundImage;
 
     private static final int FIELD_WIDTH = 180;
     private static final int FIELD_HEIGHT = 25;
     private static final int MAX_WAYPOINTS = 5;
 
-    public HomePage(RoutingService routingService,
+    public HomePage(App app, AuthService authService,
+                    RoutingService routingService,
                     GeocodingService geocodingService,
                     FavoriteService favoriteService,
                     User currentUser) {
@@ -62,14 +65,16 @@ public class HomePage extends JPanel {
         this.geocodingService = geocodingService;
         this.favoriteService = favoriteService;
         this.currentUser = currentUser;
+        this.app = app;
+        this.authService = authService;
 
         try {
             backgroundImage = ImageIO.read(new File("src/main/resources/Background/loginpageBG.jpg"));
         } catch (Exception ex) {
             backgroundImage = null;
         }
-
         setLayout(new BorderLayout());
+        add(createMenuBar(), BorderLayout.NORTH);
 
         // Sidebar with background image
         JPanel topPanel = new JPanel() {
@@ -189,6 +194,7 @@ public class HomePage extends JPanel {
         topPanel.add(routeInfoPanel);
 
         add(topPanel, BorderLayout.WEST);
+
         // Map viewer
         mapViewer = new JXMapViewer();
 
@@ -325,6 +331,50 @@ public class HomePage extends JPanel {
         });
 
         setVisible(true);
+    }
+
+    private JPanel createMenuBar() {
+
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu favoritesMenu = new JMenu("Favorites");
+        JMenuItem viewFavorites = new JMenuItem("View Favorites");
+        JMenuItem addFavorite = new JMenuItem("Add Current Route");
+        favoritesMenu.add(viewFavorites);
+        favoritesMenu.add(addFavorite);
+
+        JMenu settingsMenu = new JMenu("Settings");
+        JMenuItem accountSettings = new JMenuItem("Account Settings");
+        JMenuItem mapSettings = new JMenuItem("Map Preferences");
+        settingsMenu.add(accountSettings);
+        settingsMenu.add(mapSettings);
+
+        JMenu userMenu = new JMenu("Account");
+        JMenuItem logoutItem = new JMenuItem("Logout");
+        userMenu.add(logoutItem);
+
+        logoutItem.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to logout?",
+                    "Logout",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                SwingUtilities.getWindowAncestor(this).dispose();
+                new LoginPage(app, authService);
+            }
+        });
+
+        menuBar.add(favoritesMenu);
+        menuBar.add(settingsMenu);
+        menuBar.add(userMenu);
+
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(menuBar, BorderLayout.CENTER);
+
+        return wrapper;
     }
 
     private void addWaypoint() {

@@ -117,10 +117,13 @@ public class App extends JFrame {
 
             // Create HomePage with correct service order
             HomePage homePage = new HomePage(
+                    this,
+                    authService,
                     routingService,
                     geocodingService,
                     favoriteService,
                     currentUser
+
             );
 
             // Add HomePage to card layout
