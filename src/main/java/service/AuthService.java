@@ -23,6 +23,12 @@ public class AuthService {
             throw new IllegalArgumentException("Email is required.");
         }
 
+        // Length: 8–30
+        String tempEmail = email.replace("@gmail.com", "");
+        if (tempEmail.length() < 8 || tempEmail.length() > 20) {
+            throw new IllegalArgumentException("Email must be 8-20 characters long.");
+        }
+
         // Must be gmail domain
         if (!email.toLowerCase().endsWith("@gmail.com")) {
             throw new IllegalArgumentException("Email must be a Gmail address.");
@@ -42,7 +48,7 @@ public class AuthService {
 
         // Length: 8–30
         if (password.length() < 8 || password.length() > 30) {
-            throw new IllegalArgumentException("Password must be 8–30 characters long.");
+            throw new IllegalArgumentException("Password must be 8-30 characters long.");
         }
 
         // At least one lowercase

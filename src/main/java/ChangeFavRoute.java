@@ -163,11 +163,8 @@ public class ChangeFavRoute extends JPanel {
                 routeName
         );
 
-        if (editingRoute != null) {
-            editingRoute.setFavoriteName(routeName);
-        }
-
-        app.updateFavRouteList();
+        editingRoute.setFavoriteName(routeName); // update local copy
+        app.updateFavRouteList(); // refresh the list page
         clearScene("favRouteList");
 
     } catch (IllegalArgumentException ex) {
