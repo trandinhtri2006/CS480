@@ -150,11 +150,6 @@ public class ChangeFavRoute extends JPanel {
             return;
         }
 
-        if (routeName.isEmpty()) {
-            showError("Route name cannot be empty.");
-            return;
-        }
-
         try {
             app.getFavoriteService().updateFavoriteRouteName(
                     editingRoute.getRouteId(),
