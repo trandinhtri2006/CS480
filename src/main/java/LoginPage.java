@@ -217,7 +217,6 @@ public class LoginPage extends JPanel {
             } else {
                 app.setCurrentUser(user);
                 app.loadPages();
-                clearScene("homePage");
             }
         } catch (Exception e) {
             showError("Login failed.");
