@@ -136,7 +136,7 @@ public class App extends JFrame {
 
             // Other pages that require the App reference
             container.add(new SettingPage(this), "settingPage");
-            container.add(new ChangeFavRoute(this), "changeFavRoute");
+            container.add(new ChangeFavRoute(this, favoriteService), "changeFavRoute");
             container.add(new ChangeUsername(this), "changeUsername");
             container.add(new ChangePassword(this), "changePassword");
 
@@ -151,7 +151,25 @@ public class App extends JFrame {
 
     // Refresh favorite routes page (recreated to reflect latest data)
     public void updateFavRouteList() {
-        container.add(new FavRouteList(this, favoriteService), "favRouteList");
+        // Remove existing card by name
+        for (Component comp : container.getComponents()) {
+            if ("favRouteList".equals(comp.getName())) {
+                container.remove(comp);
+                break;
+            }
+        }
+
+        // Create fresh panel
+        JPanel panel = new FavRouteList(this, favoriteService, homePage);
+        panel.setName("favRouteList");
+        container.add(panel, "favRouteList");
+
+        // Show the card
+        CardLayout cl = (CardLayout) container.getLayout();
+        cl.show(container, "favRouteList");
+
+        container.revalidate();
+        container.repaint();
     }
 
     public FavoriteRouteSummary getSelectedFavoriteRoute() {
@@ -172,36 +190,6 @@ public class App extends JFrame {
         return editingRoute;
     }
 
-    public void openFavoriteRoute(int routeId) {
-        try {
-            FavoriteRoute fav = favoriteService.getFavoriteRoute(routeId, currentUser.getUserId());
-            homePage.loadFavoriteRoute(fav); // only for “view/run route”
-            changeScene("homePage");
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,
-                    "Failed to load favorite: " + ex.getMessage(),
-                    "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    public void openEditFavoriteRoute(FavoriteRouteSummary favSummary) {
-        setSelectedFavoriteRoute(favSummary);  // store the selected route
-        // Create or refresh the edit page with the selected route
-        container.add(new ChangeFavRoute(this), "changeFavRoute");
-        changeScene("changeFavRoute");
-    }
-
-    // Helper to get index of card by name
-    private int findCardIndex(String name) {
-        for (int i = 0; i < container.getComponentCount(); i++) {
-            if (container.getComponent(i).getName() != null &&
-                    container.getComponent(i).getName().equals(name)) {
-                return i;
-            }
-        }
-        return 0; // fallback
-    }
 
     // Application entry point (runs UI on Event Dispatch Thread)
     public static void main(String[] args) {
