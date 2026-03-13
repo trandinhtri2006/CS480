@@ -143,19 +143,12 @@ public class ChangeFavRoute extends JPanel {
         routeName = "Route";
     }
 
-    if (editingRoute == null) {
-        showError("No route selected to edit.");
-        return;
-    }
-
     try {
         app.getFavoriteService().updateFavoriteRouteName(
-                editingRoute.getRouteId(),
+                routeId,
                 app.getCurrentUser().getUserId(),
                 routeName
         );
-
-        editingRoute.setFavoriteName(routeName); // update local copy
         app.updateFavRouteList(); // refresh the list page
         clearScene("favRouteList");
 
