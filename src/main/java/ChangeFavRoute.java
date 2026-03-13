@@ -20,7 +20,7 @@ public class ChangeFavRoute extends JPanel {
     private FavoriteService favoriteService;
     private int routeId;
     private FavoriteRouteSummary editingRoute;
-    
+
     public ChangeFavRoute(App app, FavoriteService favoriteService) {
         this.app = app;
         this.favoriteService = favoriteService;
@@ -67,6 +67,15 @@ public class ChangeFavRoute extends JPanel {
 
         add(createChangeFavRoutePanel());
     }
+
+    public void setEditingRoute(FavoriteRouteSummary route) {
+    this.editingRoute = route;
+
+    if (route != null) {
+        this.routeId = route.getRouteId();
+        routeNameField.setText(route.getFavoriteName());
+    }
+}
 
     private JPanel createChangeFavRoutePanel() {
         int panelWidth = 500;
