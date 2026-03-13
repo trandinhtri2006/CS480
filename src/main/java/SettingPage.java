@@ -53,13 +53,6 @@ public class SettingPage extends JPanel {
         usernamePanel.setLayout(new BorderLayout());
 
         // Edit button on the far left
-        JButton usernameButton = new JButton("Edit");
-        usernameButton.setOpaque(false);
-        usernameButton.setContentAreaFilled(false);
-        usernameButton.setBorderPainted(false);
-        usernameButton.setFocusable(false);
-        usernameButton.addActionListener(e -> clearScene("changeUsername"));
-        usernamePanel.add(usernameButton, BorderLayout.EAST);
 
         // Username on the far right
         JLabel usernameLabel = new JLabel("Email: " + app.getCurrentUser().getEmail());
