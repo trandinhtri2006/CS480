@@ -21,16 +21,11 @@ public class RoutePainter implements Painter<JXMapViewer> {
     public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
         if (track == null || track.size() < 2) return;
 
-        // Make a copy of Graphics2D
         Graphics2D g2 = (Graphics2D) g.create();
-
-        // Enable anti-aliasing for smooth lines
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
         g2.setColor(Color.RED);
-        g2.setStroke(new BasicStroke(3));
+        g2.setStroke(new BasicStroke(4));
 
-        // Get viewport bounds
         Rectangle viewportBounds = map.getViewportBounds();
 
         Point2D prev = map.getTileFactory().geoToPixel(track.get(0), map.getZoom());

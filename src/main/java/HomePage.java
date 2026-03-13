@@ -1,6 +1,7 @@
 import model.RouteResult;
 import model.User;
 import org.jxmapviewer.painter.CompoundPainter;
+import org.jxmapviewer.painter.Painter;
 import org.jxmapviewer.viewer.*;
 import service.FavoriteService;
 import service.GeocodingService;
@@ -11,9 +12,13 @@ import com.graphhopper.util.Instruction;
 
 
 import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,11 +40,14 @@ public class HomePage extends JPanel {
     private JList<String> routeList;
     private DefaultListModel<String> routeListModel;
     private List<RouteResult> currentRoutes;
+    private GeoPosition[] currentMarkers;
+    private String[] currentMarkerAddresses;
 
     private RoutingService routingService;
     private GeocodingService geocodingService;
     private FavoriteService favoriteService;
     private User currentUser;
+    private BufferedImage backgroundImage;
 
     private static final int FIELD_WIDTH = 180;
     private static final int FIELD_HEIGHT = 25;
@@ -55,14 +63,38 @@ public class HomePage extends JPanel {
         this.favoriteService = favoriteService;
         this.currentUser = currentUser;
 
+        try {
+            backgroundImage = ImageIO.read(new File("src/main/resources/Background/loginpageBG.jpg"));
+        } catch (Exception ex) {
+            backgroundImage = null;
+        }
+
         setLayout(new BorderLayout());
 
-        // --- Top panel with BoxLayout for inputs and buttons ---
-        JPanel topPanel = new JPanel();
+        // Sidebar with background image
+        JPanel topPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (backgroundImage != null) {
+                    int pw = getWidth();
+                    int ph = getHeight();
+                    int iw = backgroundImage.getWidth();
+                    int ih = backgroundImage.getHeight();
+                    double scale = Math.max((double) pw / iw, (double) ph / ih);
+                    int dw = (int) (iw * scale);
+                    int dh = (int) (ih * scale);
+                    int dx = (pw - dw) / 2;
+                    int dy = (ph - dh) / 2;
+                    g.drawImage(backgroundImage, dx, dy, dw, dh, this);
+                }
+            }
+        };
+        topPanel.setOpaque(false);
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Fixed origin/destination fields
+        // Origin and destination fields
         originField = new JTextField();
         setFixedSize(originField);
         setPlaceholder(originField, "Origin");
@@ -75,14 +107,14 @@ public class HomePage extends JPanel {
         topPanel.add(destinationField);
         topPanel.add(Box.createVerticalStrut(5));
 
-        // Dynamic waypoint panel
         waypointPanel = new JPanel();
         waypointPanel.setLayout(new BoxLayout(waypointPanel, BoxLayout.Y_AXIS));
+        waypointPanel.setOpaque(false);
         topPanel.add(waypointPanel);
 
-        // Buttons panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setOpaque(false);
 
         JButton addWaypointButton = new JButton("Add Waypoint");
         setFixedButtonSize(addWaypointButton);
@@ -101,16 +133,20 @@ public class HomePage extends JPanel {
         routeButton.addActionListener(e -> calculateRoute());
         buttonPanel.add(routeButton);
 
-        // Panel under buttons to show multiple route options
+        // Route list
         routeListModel = new DefaultListModel<>();
         routeList = new JList<>(routeListModel);
         routeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Scrollable box for route previews
         JScrollPane routeScroll = new JScrollPane(routeList);
-        routeScroll.setPreferredSize(new Dimension(400, 150));
+        Dimension routeScrollSize = new Dimension(FIELD_WIDTH, 100);
+        routeScroll.setPreferredSize(routeScrollSize);
+        routeScroll.setMaximumSize(new Dimension(FIELD_WIDTH, 100));
+        routeScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
         topPanel.add(Box.createVerticalStrut(10));
-        topPanel.add(new JLabel("Available Routes:"));
+        topPanel.add(new JLabel("Available Routes:") {{
+            setForeground(Color.WHITE);
+        }});
         topPanel.add(routeScroll);
 
         routeList.addListSelectionListener(e -> {
@@ -121,7 +157,9 @@ public class HomePage extends JPanel {
         });
 
         distanceLabel = new JLabel("Distance: ");
+        distanceLabel.setForeground(Color.WHITE);
         timeLabel = new JLabel("Time: ");
+        timeLabel.setForeground(Color.WHITE);
 
         directionsArea = new JTextArea(8, 40);
         directionsArea.setEditable(false);
@@ -132,9 +170,11 @@ public class HomePage extends JPanel {
         directionsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         JPanel routeInfoPanel = new JPanel();
+        routeInfoPanel.setOpaque(false);
         routeInfoPanel.setLayout(new BorderLayout());
 
         JPanel summaryPanel = new JPanel(new GridLayout(2,1));
+        summaryPanel.setOpaque(false);
         summaryPanel.add(distanceLabel);
         summaryPanel.add(timeLabel);
 
@@ -149,6 +189,7 @@ public class HomePage extends JPanel {
         topPanel.add(routeInfoPanel);
 
         add(topPanel, BorderLayout.WEST);
+        // Map viewer
         mapViewer = new JXMapViewer();
 
         TileFactoryInfo info = new TileFactoryInfo(
@@ -174,10 +215,118 @@ public class HomePage extends JPanel {
 
         add(mapViewer, BorderLayout.CENTER);
 
+        // Zoom controls
+        JPanel zoomPanel = new JPanel();
+        zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.Y_AXIS));
+        zoomPanel.setOpaque(false);
+
+        JButton zoomInButton = new JButton("+");
+        zoomInButton.setFont(new Font("SansSerif", Font.BOLD, 20));
+        zoomInButton.setMargin(new Insets(0, 0, 0, 0));
+        zoomInButton.setPreferredSize(new Dimension(45, 45));
+        zoomInButton.setMinimumSize(new Dimension(45, 45));
+        zoomInButton.setMaximumSize(new Dimension(45, 45));
+        zoomInButton.setFocusable(false);
+        zoomInButton.addActionListener(e -> {
+            int zoom = mapViewer.getZoom();
+            if (zoom > 0) mapViewer.setZoom(zoom - 1);
+        });
+
+        JButton zoomOutButton = new JButton("\u2212");
+        zoomOutButton.setFont(new Font("SansSerif", Font.BOLD, 20));
+        zoomOutButton.setMargin(new Insets(0, 0, 0, 0));
+        zoomOutButton.setPreferredSize(new Dimension(45, 45));
+        zoomOutButton.setMinimumSize(new Dimension(45, 45));
+        zoomOutButton.setMaximumSize(new Dimension(45, 45));
+        zoomOutButton.setFocusable(false);
+        zoomOutButton.addActionListener(e -> {
+            int zoom = mapViewer.getZoom();
+            if (zoom < 19) mapViewer.setZoom(zoom + 1);
+        });
+
+        zoomPanel.add(zoomInButton);
+        zoomPanel.add(Box.createVerticalStrut(2));
+        zoomPanel.add(zoomOutButton);
+
+        JPanel mapWrapper = new JPanel(new BorderLayout());
+        mapWrapper.add(mapViewer, BorderLayout.CENTER);
+
+        mapViewer.setLayout(null);
+        mapViewer.add(zoomPanel);
+        mapViewer.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                zoomPanel.setBounds(mapViewer.getWidth() - 60, 10, 50, 95);
+            }
+        });
+
+        remove(mapViewer);
+        add(mapWrapper, BorderLayout.CENTER);
+        // Mouse wheel zoom
+        mapViewer.addMouseWheelListener(e -> {
+            int zoom = mapViewer.getZoom();
+            if (e.getWheelRotation() < 0) {
+                if (zoom > 0) mapViewer.setZoom(zoom - 1);
+            } else {
+                if (zoom < 19) mapViewer.setZoom(zoom + 1);
+            }
+        });
+
+        // Drag panning
+        final Point[] lastMousePosition = {null};
+        mapViewer.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                lastMousePosition[0] = e.getPoint();
+            }
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                lastMousePosition[0] = null;
+            }
+        });
+        mapViewer.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(java.awt.event.MouseEvent e) {
+                if (lastMousePosition[0] != null) {
+                    Point current = e.getPoint();
+                    int dx = current.x - lastMousePosition[0].x;
+                    int dy = current.y - lastMousePosition[0].y;
+                    Point2D center = mapViewer.getCenter();
+                    mapViewer.setCenter(new Point((int) center.getX() - dx, (int) center.getY() - dy));
+                    lastMousePosition[0] = current;
+                }
+            }
+        });
+
+        // Tooltip on marker hover
+        ToolTipManager.sharedInstance().registerComponent(mapViewer);
+        ToolTipManager.sharedInstance().setInitialDelay(200);
+        ToolTipManager.sharedInstance().setDismissDelay(5000);
+        mapViewer.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(java.awt.event.MouseEvent e) {
+                if (currentMarkers == null || currentMarkerAddresses == null) {
+                    mapViewer.setToolTipText(null);
+                    return;
+                }
+                Point mousePoint = e.getPoint();
+                Rectangle viewport = mapViewer.getViewportBounds();
+                for (int i = 0; i < currentMarkers.length; i++) {
+                    Point2D geoPixel = mapViewer.getTileFactory().geoToPixel(currentMarkers[i], mapViewer.getZoom());
+                    int mx = (int) (geoPixel.getX() - viewport.getX());
+                    int my = (int) (geoPixel.getY() - viewport.getY());
+                    if (Math.abs(mousePoint.x - mx) < 12 && Math.abs(mousePoint.y - my) < 12) {
+                        mapViewer.setToolTipText(currentMarkerAddresses[i]);
+                        return;
+                    }
+                }
+                mapViewer.setToolTipText(null);
+            }
+        });
+
         setVisible(true);
     }
 
-    // --- Add waypoint dynamically ---
     private void addWaypoint() {
         if (waypointFields.size() >= MAX_WAYPOINTS) {
             JOptionPane.showMessageDialog(this, "Maximum of " + MAX_WAYPOINTS + " waypoints reached.");
@@ -198,7 +347,6 @@ public class HomePage extends JPanel {
         waypointPanel.repaint();
     }
 
-    // --- Remove last waypoint dynamically ---
     private void removeWaypoint() {
         if (waypointFields.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No waypoints to remove.");
@@ -216,7 +364,6 @@ public class HomePage extends JPanel {
         waypointPanel.repaint();
     }
 
-    // --- Helpers for fixed size and placeholders ---
     private void setFixedSize(JTextField field) {
         Dimension size = new Dimension(FIELD_WIDTH, FIELD_HEIGHT);
         field.setPreferredSize(size);
@@ -254,44 +401,6 @@ public class HomePage extends JPanel {
         });
     }
 
-//    private void drawRoute(RouteResult result) {
-//        List<GeoPosition> track = result.getPath();
-//
-//        if (track == null || track.isEmpty()) {
-//            return;
-//        }
-//
-//        // Center the map on the route
-//        mapViewer.zoomToBestFit(new HashSet<>(track), 0.7);
-//
-//        // Create route painter
-//        RoutePainter routePainter = new RoutePainter(track);
-//
-//        // Optional: add start/end markers
-//        Set<GeoPosition> markers = new HashSet<>();
-//        markers.add(track.get(0)); // start
-//        markers.add(track.get(track.size() - 1)); // end
-//
-//        Set<Waypoint> waypoints = new HashSet<>();
-//        waypoints.add(new DefaultWaypoint(track.get(0))); // start
-//        waypoints.add(new DefaultWaypoint(track.get(track.size() - 1))); // end
-//
-//        WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<>();
-//        waypointPainter.setWaypoints(waypoints);
-//        waypointPainter.setRenderer((g, map, wp) -> {
-//            Point2D point = map.getTileFactory().geoToPixel(wp.getPosition(), map.getZoom());
-//            g.setColor(Color.BLUE);
-//            g.fillOval((int) point.getX() - 5, (int) point.getY() - 5, 10, 10);
-//        });
-//
-//        // Combine painters
-//        CompoundPainter<JXMapViewer> painters = new CompoundPainter<>();
-//        painters.setPainters(routePainter, waypointPainter);
-//        mapViewer.setOverlayPainter(painters);
-//        mapViewer.repaint();
-//    }
-
-
     private void drawRoute(RouteResult result) {
 
         List<GeoPosition> track = result.getPath();
@@ -300,52 +409,56 @@ public class HomePage extends JPanel {
             return;
         }
 
-        // --- Route line ---
         RoutePainter routePainter = new RoutePainter(track);
 
-        // --- Waypoint dots ---
-        Set<Waypoint> waypoints = new HashSet<>();
         GeoPosition[] markers = result.getMarkers();
-
-        for (GeoPosition pos : markers) {
-            waypoints.add(new DefaultWaypoint(pos));
+        currentMarkers = markers;
+        // Resolve addresses via reverse geocoding
+        String[] resolvedAddresses = new String[markers.length];
+        for (int i = 0; i < markers.length; i++) {
+            resolvedAddresses[i] = geocodingService.reverseGeocode(
+                    markers[i].getLatitude(), markers[i].getLongitude());
         }
+        currentMarkerAddresses = resolvedAddresses;
 
-        WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<>();
-        waypointPainter.setWaypoints(waypoints);
+        // Marker painter
+        Painter<JXMapViewer> markerPainter = (g2d, map, w, h) -> {
+            Graphics2D g = (Graphics2D) g2d;
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+            for (int mi = 0; mi < markers.length; mi++) {
+                Point2D point = map.getTileFactory().geoToPixel(markers[mi], map.getZoom());
+                Rectangle viewport = map.getViewportBounds();
 
-        waypointPainter.setRenderer((g, map, wp) -> {
+                int x = (int) (point.getX() - viewport.getX());
+                int y = (int) (point.getY() - viewport.getY());
 
-            Point2D point = map.getTileFactory().geoToPixel(wp.getPosition(), map.getZoom());
-            Rectangle viewport = map.getViewportBounds();
+                if (mi == 0) {
+                    g.setColor(new Color(0, 180, 0));
+                } else if (mi == markers.length - 1) {
+                    g.setColor(Color.RED);
+                } else {
+                    g.setColor(new Color(30, 100, 255));
+                }
 
-            int x = (int) (point.getX() - viewport.getX());
-            int y = (int) (point.getY() - viewport.getY());
+                g.fillOval(x - 12, y - 12, 24, 24);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(2));
+                g.drawOval(x - 12, y - 12, 24, 24);
 
-            int index = track.indexOf(wp.getPosition());
-
-            if (index == 0) {
-                g.setColor(Color.GREEN); // start
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("SansSerif", Font.BOLD, 14));
+                String label = String.valueOf((char) ('A' + mi));
+                FontMetrics fm = g.getFontMetrics();
+                g.drawString(label, x - fm.stringWidth(label) / 2, y + fm.getAscent() / 2 - 1);
             }
-            else if (index == track.size() - 1) {
-                g.setColor(Color.RED); // destination
-            }
-            else {
-                g.setColor(Color.BLUE); // waypoint
-            }
+        };
 
-            g.fillOval(x - 7, y - 7, 14, 14);
-
-            g.setColor(Color.WHITE);
-            g.drawString(String.valueOf(index), x - 3, y + 4);
-        });
-
-        // --- Combine painters ---
         CompoundPainter<JXMapViewer> painters = new CompoundPainter<>();
-        painters.setPainters(routePainter, waypointPainter);
+        painters.setPainters(routePainter, markerPainter);
+        painters.setCacheable(false);
         mapViewer.setOverlayPainter(painters);
 
-        // --- Center and fit map ---
         mapViewer.zoomToBestFit(new HashSet<>(track), 0.7);
         mapViewer.repaint();
 
@@ -356,17 +469,13 @@ public class HomePage extends JPanel {
         for (int i = 0; i < instructions.size(); i++) {
             Instruction instr = instructions.get(i);
 
-            // Convert meters → miles
             double miles = instr.getDistance() / 1609.34;
             String distanceStr = String.format("%.2f mi", miles);
 
-            // Get turn description (if null, fallback to "continue")
             String turn = instr.getTurnDescription(routingService.getTranslation());
             if (turn == null || turn.isBlank()) {
                 turn = "continue";
             }
-
-            // Append step number, turn, and distance
             directionsText.append(i + 1)
                     .append(". ")
                     .append(turn)
@@ -376,23 +485,13 @@ public class HomePage extends JPanel {
                     .append("\n");
         }
 
-        // Set the text area
         directionsArea.setText(directionsText.toString());
-        directionsArea.setCaretPosition(0); // scroll to top
-
-        directionsArea.setText(directionsText.toString());
+        directionsArea.setCaretPosition(0);
 
         distanceLabel.setText("Distance: " + result.getDistanceMiles() + " miles");
         timeLabel.setText("Time: " + result.getFormattedTime());
-
-        JTextArea directionsArea = new JTextArea(directionsText.toString());
-        directionsArea.setEditable(false);
-
-        JScrollPane scrollPane = new JScrollPane(directionsArea);
-        scrollPane.setPreferredSize(new Dimension(350, 400));
     }
 
-    // --- Calculate route ---
     private void calculateRoute() {
 
         String origin = originField.getText().trim();
@@ -417,13 +516,9 @@ public class HomePage extends JPanel {
         allAddresses.add(destination);
 
         try {
-            // Convert addresses → coordinates
             List<double[]> allCoords = geocodingService.getCoordinates(allAddresses);
-
-            // Get multiple alternative routes
             currentRoutes = routingService.calculateRoutes(allCoords, allAddresses, "car");
 
-            // Populate the route preview list
             routeListModel.clear();
             for (int i = 0; i < currentRoutes.size(); i++) {
                 RouteResult r = currentRoutes.get(i);
@@ -433,7 +528,7 @@ public class HomePage extends JPanel {
 
             if (!currentRoutes.isEmpty()) {
                 routeList.setSelectedIndex(0);
-                drawRoute(currentRoutes.get(0)); // show first route by default
+                drawRoute(currentRoutes.get(0));
             }
 
         } catch (Exception e) {

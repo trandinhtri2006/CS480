@@ -28,11 +28,6 @@ public class AuthService {
             throw new IllegalArgumentException("Email must be a Gmail address.");
         }
 
-        // Must be gmail domain
-        if (!email.toLowerCase().endsWith("@gmail.com")) {
-            throw new IllegalArgumentException("Email must be a Gmail address.");
-        }
-
         // Extract local part (before @)
         String localPart = email.substring(0, email.indexOf("@"));
 
@@ -101,11 +96,6 @@ public class AuthService {
     public boolean resetPassword(String email, String newPassword) throws Exception {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email is required.");
-        }
-
-        // Must be gmail domain
-        if (!email.toLowerCase().endsWith("@gmail.com")) {
-            throw new IllegalArgumentException("Email must be a Gmail address.");
         }
 
         // Must be gmail domain

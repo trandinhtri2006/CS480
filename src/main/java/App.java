@@ -106,7 +106,7 @@ public class App extends JFrame {
     public void loadPages() {
         try {
             // Initialize routing and geocoding services
-            RoutingService routingService = new RoutingService("washington-260309.osm.pbf", "graph-cache");
+            RoutingService routingService = new RoutingService("maps/washington-260309.osm.pbf", "graph-cache");
             GeocodingService geocodingService = new GeocodingService();
 
             // Create HomePage with correct service order

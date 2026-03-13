@@ -4,6 +4,9 @@ mapapp.db
 # Map data (large .osm.pbf files)
 maps/
 
+# GraphHopper routing cache
+graph-cache/
+
 # Maven build output
 target/
 
