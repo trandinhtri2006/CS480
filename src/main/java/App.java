@@ -34,7 +34,6 @@ public class App extends JFrame {
     private FavoriteRouteSummary selectedFavoriteRoute;
     private HomePage homePage;
 
-    private ChangeFavRoute changeFavRoute;
 
     // App constructor — initializes services, UI, and screens
     public App() {
@@ -167,8 +166,7 @@ public class App extends JFrame {
 
                     container.add(homePage, "homePage");
                     container.add(new SettingPage(App.this), "settingPage");
-                    changeFavRoute = new ChangeFavRoute(App.this, favoriteService);
-                    container.add(changeFavRoute, "changeFavRoute");
+
                     container.add(new ChangeUsername(App.this), "changeUsername");
                     container.add(new ChangePassword(App.this), "changePassword");
 
@@ -189,16 +187,7 @@ public class App extends JFrame {
         worker.execute();
         loadingDialog.setVisible(true); // blocks until dialog is disposed
     }
-    //method to change favorite route name
-    public void openEditFavoriteRoute(FavoriteRouteSummary route) {
-    this.editingRoute = route;
 
-    if (changeFavRoute != null) {
-        changeFavRoute.setEditingRoute(route);
-    }
-
-    changeScene("changeFavRoute");
-}
     // Refresh favorite routes page (recreated to reflect latest data)
     public void updateFavRouteList() {
         // Remove existing card by name
@@ -230,15 +219,7 @@ public class App extends JFrame {
         this.selectedFavoriteRoute = route;
     }
 
-    private FavoriteRouteSummary editingRoute;
 
-    public void setEditingRoute(FavoriteRouteSummary route) {
-        this.editingRoute = route;
-    }
-
-    public FavoriteRouteSummary getEditingRoute() {
-        return editingRoute;
-    }
 
 
     // Application entry point (runs UI on Event Dispatch Thread)

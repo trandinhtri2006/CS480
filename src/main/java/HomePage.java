@@ -708,11 +708,11 @@ addFavorite.addActionListener(e -> {
                 drawRoute(currentRoutes.get(0));
             }
 
-        } catch (RuntimeException e) {
-            JOptionPane.showMessageDialog(this, "Too many API calls!!");
-            e.printStackTrace();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Routing error: " + e.getMessage());
+        } catch (RuntimeException | Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Unable to find a route. Please check your addresses and try again.",
+                    "Route Not Found",
+                    JOptionPane.WARNING_MESSAGE);
             e.printStackTrace();
         }
     }

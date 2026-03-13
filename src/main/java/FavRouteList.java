@@ -142,7 +142,7 @@ public class FavRouteList extends JPanel {
 
         JButton renameButton = new JButton("Rename");
         renameButton.addActionListener(e -> {
-            app.openEditFavoriteRoute(route);
+            renameRoute(route);
         });
 
         JButton deleteButton = new JButton("Delete");
@@ -171,6 +171,49 @@ public class FavRouteList extends JPanel {
     }
 
     
+    /**
+     * Handle rename route logic via popup dialog
+     */
+    private void renameRoute(FavoriteRouteSummary route) {
+        JTextField nameField = new JTextField(route.getFavoriteName());
+        Object[] message = { "Enter new route name:", nameField };
+
+        int option = JOptionPane.showOptionDialog(this,
+                message,
+                "Rename Route",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                new String[]{"Cancel", "Confirm"},
+                "Confirm");
+
+        if (option != 1) {
+            return;
+        }
+
+        String newName = nameField.getText().trim();
+        if (newName.isEmpty()) {
+            newName = "Route";
+        }
+
+        try {
+            int userId = app.getCurrentUser().getUserId();
+            favoriteService.updateFavoriteRouteName(route.getRouteId(), userId, newName);
+            route.setFavoriteName(newName);
+            app.updateFavRouteList();
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(),
+                    "Invalid Name",
+                    JOptionPane.WARNING_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Failed to rename route:\n" + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     /**
      * Handle delete route logic
      */
