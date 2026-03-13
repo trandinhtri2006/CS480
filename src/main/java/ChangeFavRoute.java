@@ -19,6 +19,7 @@ public class ChangeFavRoute extends JPanel {
     final private App app;
     private FavoriteService favoriteService;
     private int routeId;
+    private FavoriteRouteSummary editingRoute;
 
     public ChangeFavRoute(App app, FavoriteService favoriteService) {
         this.app = app;
@@ -66,6 +67,15 @@ public class ChangeFavRoute extends JPanel {
 
         add(createChangeFavRoutePanel());
     }
+
+    public void setEditingRoute(FavoriteRouteSummary route) {
+    this.editingRoute = route;
+
+    if (route != null) {
+        this.routeId = route.getRouteId();
+        routeNameField.setText(route.getFavoriteName());
+    }
+}
 
     private JPanel createChangeFavRoutePanel() {
         int panelWidth = 500;
@@ -134,24 +144,31 @@ public class ChangeFavRoute extends JPanel {
     // ------------------------------
     // Handle change password logic
     // ------------------------------
-    private void handleReset() {
-
+   private void handleReset() {
     String routeName = routeNameField.getText().trim();
 
-    // If user leaves name blank, give it a default name
     if (routeName.isEmpty()) {
         routeName = "Route";
     }
 
+    if (routeId <= 0) {
+        showError("No route selected to edit.");
+        return;
+    }
+
     try {
-        app.getFavoriteService().updateFavoriteRouteName(
+        favoriteService.updateFavoriteRouteName(
                 routeId,
                 app.getCurrentUser().getUserId(),
                 routeName
         );
+
+        editingRoute.setFavoriteName(routeName); // update local copy
         app.updateFavRouteList(); // refresh the list page
         clearScene("favRouteList");
 
+    } catch (IllegalArgumentException ex) {
+        showError(ex.getMessage());
     } catch (SQLException ex) {
         showError("Failed to update route: " + ex.getMessage());
     }
