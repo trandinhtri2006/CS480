@@ -117,39 +117,70 @@ public class App extends JFrame {
     }
 
     public void loadPages() {
-        try {
-            // Initialize routing and geocoding services
-            RoutingService routingService = new RoutingService("maps/washington-260309.osm.pbf", "graph-cache");
-            GeocodingService geocodingService = new GeocodingService();
+        // Create loading dialog
+        JDialog loadingDialog = new JDialog(this, "Loading", true);
+        JPanel loadingPanel = new JPanel(new BorderLayout(10, 10));
+        loadingPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-            // Create HomePage with correct service order
-            homePage = new HomePage(
-                    this,
-                    authService,
-                    routingService,
-                    geocodingService,
-                    favoriteService,
-                    currentUser
+        JLabel loadingLabel = new JLabel("Loading map data, please wait...", SwingConstants.CENTER);
+        JProgressBar progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
 
-            );
+        loadingPanel.add(loadingLabel, BorderLayout.NORTH);
+        loadingPanel.add(progressBar, BorderLayout.CENTER);
 
-            // Add HomePage to card layout
-            container.add(homePage, "homePage");
+        loadingDialog.setContentPane(loadingPanel);
+        loadingDialog.setSize(350, 120);
+        loadingDialog.setLocationRelativeTo(this);
+        loadingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        loadingDialog.setResizable(false);
 
-            // Other pages that require the App reference
-            container.add(new SettingPage(this), "settingPage");
-            changeFavRoute = new ChangeFavRoute(this, favoriteService);
-            container.add(changeFavRoute, "changeFavRoute");
-            container.add(new ChangeUsername(this), "changeUsername");
-            container.add(new ChangePassword(this), "changePassword");
+        // Run heavy initialization on background thread
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                RoutingService routingService = new RoutingService("maps/washington-260309.osm.pbf", "graph-cache");
+                GeocodingService geocodingService = new GeocodingService();
 
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Failed to initialize HomePage:\n" + e.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+                homePage = new HomePage(
+                        App.this,
+                        authService,
+                        routingService,
+                        geocodingService,
+                        favoriteService,
+                        currentUser
+                );
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get(); // check for exceptions
+
+                    container.add(homePage, "homePage");
+                    container.add(new SettingPage(App.this), "settingPage");
+                    changeFavRoute = new ChangeFavRoute(App.this, favoriteService);
+                    container.add(changeFavRoute, "changeFavRoute");
+                    container.add(new ChangeUsername(App.this), "changeUsername");
+                    container.add(new ChangePassword(App.this), "changePassword");
+
+                    loadingDialog.dispose();
+                    changeScene("homePage");
+
+                } catch (Exception e) {
+                    loadingDialog.dispose();
+                    JOptionPane.showMessageDialog(App.this,
+                            "Failed to initialize HomePage:\n" + e.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        worker.execute();
+        loadingDialog.setVisible(true); // blocks until dialog is disposed
     }
     //method to change favorite route name
     public void openEditFavoriteRoute(FavoriteRouteSummary route) {
