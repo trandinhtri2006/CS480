@@ -136,8 +136,13 @@ public class AuthService {
 
         String salt = generateSalt();
         String hash = hashPassword(newPassword, salt);
-
-        return sqlHandler.updatePassword(email.trim(), hash, salt);
+        
+        User user = sqlHandler.getUserByEmail(email);
+        if (user != null) {
+            return sqlHandler.updatePassword(email.trim(), hash, salt);
+        } else {
+            throw new IllegalArgumentException("Email does not exist");
+        }
     }
 
     private String generateSalt() {
