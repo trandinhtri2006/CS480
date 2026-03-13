@@ -4,8 +4,11 @@ import model.User;
 import service.FavoriteService;
 
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class FavRouteList extends JPanel {
@@ -21,6 +24,9 @@ public class FavRouteList extends JPanel {
     // Reference to home page for loading routes
     private HomePage homePage;
 
+    // Background image
+    private Image backgroundImage;
+
     public FavRouteList(App app, FavoriteService favoriteService, HomePage homePage) {
         this.app = app;
         this.favoriteService = favoriteService;
@@ -28,7 +34,12 @@ public class FavRouteList extends JPanel {
 
         setLayout(null);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setBackground(Color.GRAY);
+
+        try {
+            backgroundImage = ImageIO.read(new File("src/main/resources/Background/loginpageBG.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // ------------------------------
         // Back Button at top-left corner
@@ -43,6 +54,14 @@ public class FavRouteList extends JPanel {
         add(backButton);
 
         add(createFavRoutePanel());
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, WIDTH, HEIGHT, this);
+        }
     }
 
     /**
@@ -156,6 +175,15 @@ public class FavRouteList extends JPanel {
      * Handle delete route logic
      */
     private void deleteRoute(int routeId) {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete this route?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
         try {
             int userId = app.getCurrentUser().getUserId();
             favoriteService.deleteFavorite(routeId, userId);

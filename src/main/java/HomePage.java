@@ -404,7 +404,6 @@ addFavorite.addActionListener(e -> {
     try {
         favoriteService.saveFavorite(fav);
         JOptionPane.showMessageDialog(this, "Route added to favorites!");
-        app.updateFavRouteList(); // Refresh favorites page
     } catch (Exception ex) {
         JOptionPane.showMessageDialog(this,
                 "Failed to save favorite route:\n" + ex.getMessage(),

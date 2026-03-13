@@ -114,12 +114,20 @@ public class ChangeFavRoute extends JPanel {
         // ------------------------------
         // "Create Account" button
         // ------------------------------
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(45, 200, 200, 30);
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setBackground(new Color(80, 80, 80));
+        cancelButton.setFocusable(false);
+        cancelButton.addActionListener(e -> clearScene("favRouteList"));
+        panel.add(cancelButton);
+
         JButton confirmButton = new JButton("Confirm");
-        confirmButton.setBounds(150, 200, 200, 30);
+        confirmButton.setBounds(255, 200, 200, 30);
         confirmButton.setForeground(Color.WHITE);
         confirmButton.setBackground(new Color(50, 50, 100));
         confirmButton.setFocusable(false);
-        confirmButton.addActionListener(e -> handleReset()); // Handle account creation
+        confirmButton.addActionListener(e -> handleReset());
         panel.add(confirmButton);
 
         return panel;
