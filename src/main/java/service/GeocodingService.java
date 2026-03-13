@@ -146,8 +146,8 @@ public class GeocodingService {
         String coordSection = resp.substring(resp.indexOf("\"coordinates\""));
         double lon = parseJsonNumericValue(coordSection, "x");
         double lat = parseJsonNumericValue(coordSection, "y");
-
-        System.out.println("Geocoded via Census Bureau: " + address + " -> " + lat + ", " + lon);
+        
+        // System.out.println("Geocoded via Census Bureau: " + address + " -> " + lat + ", " + lon);
         return new double[]{lat, lon};
     }
 

@@ -120,22 +120,26 @@ public class HomePage extends JPanel {
         topPanel.add(waypointPanel);
 
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setFocusable(false);
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setOpaque(false);
 
         JButton addWaypointButton = new JButton("Add Waypoint");
+        addWaypointButton.setFocusable(false);
         setFixedButtonSize(addWaypointButton);
         addWaypointButton.addActionListener(e -> addWaypoint());
         buttonPanel.add(addWaypointButton);
         buttonPanel.add(Box.createVerticalStrut(5));
 
         JButton removeWaypointButton = new JButton("Remove Waypoint");
+        removeWaypointButton.setFocusable(false);
         setFixedButtonSize(removeWaypointButton);
         removeWaypointButton.addActionListener(e -> removeWaypoint());
         buttonPanel.add(removeWaypointButton);
         buttonPanel.add(Box.createVerticalStrut(5));
 
         JButton routeButton = new JButton("Get Route");
+        routeButton.setFocusable(false);
         setFixedButtonSize(routeButton);
         routeButton.addActionListener(e -> calculateRoute());
         buttonPanel.add(routeButton);
@@ -152,7 +156,7 @@ public class HomePage extends JPanel {
         routeScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
         topPanel.add(Box.createVerticalStrut(10));
         topPanel.add(new JLabel("Available Routes:") {{
-            setForeground(Color.WHITE);
+            setForeground(Color.BLACK);
         }});
         topPanel.add(routeScroll);
 
@@ -164,9 +168,9 @@ public class HomePage extends JPanel {
         });
 
         distanceLabel = new JLabel("Distance: ");
-        distanceLabel.setForeground(Color.WHITE);
+        distanceLabel.setForeground(Color.BLACK);
         timeLabel = new JLabel("Time: ");
-        timeLabel.setForeground(Color.WHITE);
+        timeLabel.setForeground(Color.BLACK);
 
         directionsArea = new JTextArea(8, 40);
         directionsArea.setEditable(false);
@@ -217,9 +221,11 @@ public class HomePage extends JPanel {
         DefaultTileFactory tileFactory = new DefaultTileFactory(info);
         mapViewer.setTileFactory(tileFactory);
 
-        GeoPosition start = new GeoPosition(47.018077, -120.538130);
+        GetUserLocation location = new GetUserLocation();
+        double[] coords = location.getCoordinates();
+        GeoPosition start = new GeoPosition(coords[0], coords[1]);
         mapViewer.setAddressLocation(start);
-        mapViewer.setZoom(4);
+        mapViewer.setZoom(3);
 
         add(mapViewer, BorderLayout.CENTER);
 
