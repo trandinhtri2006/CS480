@@ -667,18 +667,32 @@ addFavorite.addActionListener(e -> {
             return;
         }
 
-        List<String> allAddresses = new ArrayList<>();
-        allAddresses.add(origin);
+       List<String> allAddresses = new ArrayList<>();
+allAddresses.add(origin);
 
-        for (JTextField wpField : waypointFields) {
-            String wp = wpField.getText().trim();
-            if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
-                allAddresses.add(wp);
-            }
-        }
+for (JTextField wpField : waypointFields) {
+    String wp = wpField.getText().trim();
+    if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
+        allAddresses.add(wp);
+    }
+}
 
-        allAddresses.add(destination);
+allAddresses.add(destination);
 
+//duplicate check
+Set<String> uniqueAddresses = new HashSet<>();
+
+for (String addr : allAddresses) {
+    String normalized = addr.toLowerCase().trim();
+
+    if (!uniqueAddresses.add(normalized)) {
+        JOptionPane.showMessageDialog(this,
+                "Duplicate addresses are not allowed in the route.",
+                "Invalid Route",
+                JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+}
         try {
             List<double[]> allCoords = geocodingService.getCoordinates(allAddresses);
             currentRoutes = routingService.calculateRoutes(allCoords, allAddresses, "car");
