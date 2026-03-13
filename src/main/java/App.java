@@ -65,6 +65,12 @@ public class App extends JFrame {
 
         // Frame configuration
         setTitle("GPS APP");
+        try {
+            Image icon = new ImageIcon("src/main/resources/Background/applicationIcon.jpg").getImage();
+            setIconImage(icon);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setSize(1280, 720);
         setLocationRelativeTo(null); // Center on screen
         setDefaultCloseOperation(EXIT_ON_CLOSE);
