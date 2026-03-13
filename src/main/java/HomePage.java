@@ -53,7 +53,7 @@ public class HomePage extends JPanel {
     private AuthService authService;
     private BufferedImage backgroundImage;
 
-    private static final int FIELD_WIDTH = 180;
+    private static final int FIELD_WIDTH = 350;
     private static final int FIELD_HEIGHT = 25;
     private static final int MAX_WAYPOINTS = 5;
 
@@ -666,32 +666,32 @@ addFavorite.addActionListener(e -> {
             return;
         }
 
-       List<String> allAddresses = new ArrayList<>();
-allAddresses.add(origin);
+        List<String> allAddresses = new ArrayList<>();
+        allAddresses.add(origin);
 
-for (JTextField wpField : waypointFields) {
-    String wp = wpField.getText().trim();
-    if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
-        allAddresses.add(wp);
-    }
-}
+        for (JTextField wpField : waypointFields) {
+            String wp = wpField.getText().trim();
+            if (!wp.isEmpty() && !wp.startsWith("Waypoint")) {
+                allAddresses.add(wp);
+            }
+        }
 
-allAddresses.add(destination);
+        allAddresses.add(destination);
 
-//duplicate check
-Set<String> uniqueAddresses = new HashSet<>();
+        //duplicate check
+        Set<String> uniqueAddresses = new HashSet<>();
 
-for (String addr : allAddresses) {
-    String normalized = addr.toLowerCase().trim();
+        for (String addr : allAddresses) {
+            String normalized = addr.toLowerCase().trim();
 
-    if (!uniqueAddresses.add(normalized)) {
-        JOptionPane.showMessageDialog(this,
-                "Duplicate addresses are not allowed in the route.",
-                "Invalid Route",
-                JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-}
+            if (!uniqueAddresses.add(normalized)) {
+                JOptionPane.showMessageDialog(this,
+                        "Duplicate addresses are not allowed in the route.",
+                        "Invalid Route",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
         try {
             List<double[]> allCoords = geocodingService.getCoordinates(allAddresses);
             currentRoutes = routingService.calculateRoutes(allCoords, allAddresses, "car");
@@ -708,6 +708,9 @@ for (String addr : allAddresses) {
                 drawRoute(currentRoutes.get(0));
             }
 
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(this, "Too many API calls!!");
+            e.printStackTrace();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Routing error: " + e.getMessage());
             e.printStackTrace();
